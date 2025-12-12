@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>Ie 核心控制台</title>
+    <script src="https://unpkg.com/leancloud-storage@4.12.0/dist/av-min.js"></script>
+    <style>
+        body { 
+            font-family: 'Segoe UI', Roboto, sans-serif; 
+            background-color: #0d1117; /* 黑客风深色背景 */
+            color: #c9d1d9;
+            display: flex; justify-content: center; align-items: center; 
+            min-height: 100vh; margin: 0; 
+        }
+        .box { 
+            background: #161b22; 
+            padding: 40px; 
+            border: 1px solid #30363d;
+            border-radius: 12px; 
+            box-shadow: 0 0 50px rgba(0,0,0,0.5); 
+            width: 400px; 
+        }
+        h2 { text-align: center; color: #58a6ff; margin-top: 0; letter-spacing: 2px;}
+        
+        .input-group { margin-bottom: 15px; }
+        label { display: block; margin-bottom: 5px; font-size: 12px; color: #8b949e; }
+        input { 
+            width: 100%; padding: 12px; 
+            background: #0d1117; border: 1px solid #30363d; 
+            color: white; border-radius: 6px; box-sizing: border-box;
+            font-family: monospace;
+        }
+        input:focus { border-color: #58a6ff; outline: none; }
+        
+        button { 
+            width: 100%; padding: 12px; margin-top: 20px; 
+            background: #238636; color: white; 
+            border: none; border-radius: 6px; 
+            cursor: pointer; font-weight: bold; font-size: 14px;
+            transition: all 0.3s;
+        }
+        button:hover { background: #2ea043; }
+        
+        .danger-btn { background: #da3633; margin-top: 10px;}
+        .danger-btn:hover { background: #f85149; }
+        
+        .hidden { display: none; }
+        .alert { color: #f85149; text-align: center; font-size: 13px; margin-top: 10px; }
+        
+        /* 模拟指纹扫描动画效果 */
+        .scan-line {
+            height: 2px; background: #58a6ff; width: 100%;
+            position: relative; top: 0;
+            animation: scan 2s infinite;
+            display: none;
+        }
+        @keyframes scan { 0% {top: 0;} 50% {top: 100%;} 100% {top: 0;} }
+    </style>
+</head>
+<body>
+
+    <!-- === 1. 登录验证区 === -->
+    <div id="login-panel" class="box">
+        <h2>🔒 ACCESS CONTROL</h2>
+        <div id="scan-bar" class="scan-line"></div>
+        
+        <div class="input-group">
+            <label>ADMIN EMAIL</label>
+            <input type="text" id="email" placeholder="输入管理员邮箱">
+        </div>
+        <div class="input-group">
+            <label>PASSWORD</label>
+            <input type="password" id="password" placeholder="输入账户密码">
+        </div>
+        <div class="input-group">
+            <label>SECURITY KEY (二级验证)</label>
+            <input type="password" id="secret-key" placeholder="输入你的私有安全密钥">
+        </div>
+
+        <button onclick="secureLogin()">VERIFY & LOGIN</button>
+        <div id="msg" class="alert"></div>
+    </div>
+
+    <!-- === 2. 核心控制台 (和之前一样，但风格变了) === -->
+    <div id="dashboard" class="box hidden" style="width: 500px;">
+        <h2 style="color: #238636;">✅ ACCESS GRANTED</h2>
+        <p style="text-align: center; font-size: 12px; color: #8b949e;">
+            Identity: <span id="user-display"></span><br>
+            Session ID: <span id="session-display"></span>
+        </p>
+
+        <!-- 在线设备监控 -->
+        <div style="background: #21262d; padding: 15px; border-radius: 8px; margin-bottom: 20px;">
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+                <span style="font-size: 14px;">📡 在线设备数: <b id="device-count" style="color: #58a6ff;">1</b></span>
+                <button onclick="logoutOthers()" class="danger-btn" style="width: auto; margin:0; padding: 5px 10px; font-size: 12px;">踢出其他</button>
+            </div>
+        </div>
+
+        <!-- 发布商品 -->
+        <h3 style="border-bottom: 1px solid #30363d; padding-bottom: 10px;">发布新物品</h3>
+        <div class="input-group">
+            <input type="text" id="p-name" placeholder="Item Name">
+        </div>
+        <div class="input-group">
+            <input type="number" id="p-price" placeholder="Price">
+        </div>
+        <div class="input-group">
+            <input type="text" id="p-img" placeholder="Image URL">
+        </div>
+        <button onclick="uploadData()">UPLOAD DATA</button>
+        <button onclick="doLogout()" style="background: #30363d; margin-top: 10px;">LOGOUT</button>
+    </div>
+
+    <script>
+        // ================= 配置区 (请修改这里！) =================
+        const CONFIG = {
+            appId: "SKHyBQH4nGeF6PDB8MVLTMD4-MdYXbMMI",
+            appKey: "kUQ2O1stpz6V8bNhcbk2tkrV",
+            // 🔒 只有这个邮箱能登录 (白名单)
+            adminEmail: "lluoqi816@gmail.com", 
+            // 🔑 只有输入这个密钥才能登录 (你自己设定的暗号)
+            mySecretKey: "Icecube2024" 
+        };
+        // =======================================================
+
+       AV.init({ 
+    appId: CONFIG.appId, 
+    appKey: CONFIG.appKey, 
+    // 👇 换成你刚才复制的那个网址，千万不要照抄我这行 👇
+    serverURL: "https://skhybqh4.api.lncldglobal.com" 
+});
+
+        // 页面加载检查
+        checkLogin();
+
+        async function secureLogin() {
+            const email = document.getElementById('email').value.trim();
+            const pass = document.getElementById('password').value;
+            const key = document.getElementById('secret-key').value;
+            const msg = document.getElementById('msg');
+            const scan = document.getElementById('scan-bar');
+
+            msg.innerText = "";
+
+            // 1. 本地第一道防线：检查密钥 (为了防止暴力破解，先验证这个)
+            if (key !== CONFIG.mySecretKey) {
+                msg.innerText = "❌ 安全密钥错误 (Security Key Invalid)";
+                return;
+            }
+
+            // 2. 本地第二道防线：检查邮箱白名单
+            if (email !== CONFIG.adminEmail) {
+                msg.innerText = "❌ 该邮箱未授权管理员访问";
+                return;
+            }
+
+            // 3. 开始云端验证
+            scan.style.display = 'block'; // 播放动画
+            msg.innerText = "正在连接加密服务器...";
+
+            try {
+               const user = await AV.User.logIn(email, pass);
+                
+                // 4. 双重保险：检查邮箱验证状态
+                if (!user.get('emailVerified')) {
+                    throw new Error("邮箱未激活，无法进入核心后台");
+                }
+
+                msg.style.color = "#238636";
+                msg.innerText = "验证通过，正在跳转...";
+                setTimeout(() => {
+                    location.reload();
+                }, 1000);
+
+            } catch (error) {
+                scan.style.display = 'none';
+                msg.style.color = "#f85149";
+                msg.innerText = "登录失败: " + error.message;
+            }
+        }
+
+        async function checkLogin() {
+            const user = AV.User.current();
+            if (user) {
+                // 如果登录了，最后再校验一次是不是管理员本人
+                if (user.getEmail() !== CONFIG.adminEmail) {
+                    AV.User.logOut();
+                    alert("检测到非法账号，强制登出");
+                    location.reload();
+                    return;
+                }
+
+                document.getElementById('login-panel').classList.add('hidden');
+                document.getElementById('dashboard').classList.remove('hidden');
+                document.getElementById('user-display').innerText = user.getUsername();
+                document.getElementById('session-display').innerText = user.getSessionToken().substring(0, 10) + "***";
+                
+                checkDevices();
+            }
+        }
+
+        // === 设备监控与踢人 (和之前一样) ===
+        async function checkDevices() {
+            const query = new AV.Query('_Session');
+            query.equalTo('user', AV.User.current());
+            const count = await query.count();
+            document.getElementById('device-count').innerText = count;
+        }
+
+        async function logoutOthers() {
+            if(!confirm("⚠️ 警告：这将切断所有其他设备的连接。继续？")) return;
+            const currentToken = AV.User.current().getSessionToken();
+            const query = new AV.Query('_Session');
+            query.equalTo('user', AV.User.current());
+            const sessions = await query.find();
+            
+            sessions.forEach(s => {
+                if(s.get('sessionToken') !== currentToken) s.destroy();
+            });
+            alert("其他设备已清除");
+            checkDevices();
+        }
+
+        function doLogout() {
+            AV.User.logOut();
+            location.reload();
+        }
+
+        function uploadData() {
+            // ... (上传代码同前，省略以节省篇幅，功能完全一样) ...
+            const name = document.getElementById('p-name').value;
+            const price = Number(document.getElementById('p-price').value);
+            const img = document.getElementById('p-img').value;
+            if(!name || !price || !img) return alert("信息不完整");
+            
+            const Product = AV.Object.extend('Product');
+            const p = new Product();
+            p.set('name', name); p.set('price', price); p.set('image', img);
+            p.save().then(() => { alert("发布成功"); document.getElementById('p-name').value=''; }, (e)=>alert(e.message));
+        }
+    </script>
+</body>
+</html>

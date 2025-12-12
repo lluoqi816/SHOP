@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Icecube Store | 官方商城</title>
+    <!-- 引入 LeanCloud SDK -->
+    <script src="https://unpkg.com/leancloud-storage@4.12.0/dist/av-min.js"></script>
+    <style>
+        /* === 全局样式 === */
+        :root { --primary: #007bff; --bg: #f8f9fa; --text: #333; }
+        body { font-family: 'Segoe UI', sans-serif; background: var(--bg); margin: 0; color: var(--text); }
+        
+        /* === 顶部导航 === */
+        header { background: #fff; padding: 15px 20px; box-shadow: 0 2px 10px rgba(0,0,0,0.05); display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 100; }
+        .logo { font-size: 1.5rem; font-weight: bold; color: var(--primary); }
+        .cart-btn { background: var(--primary); color: white; padding: 8px 15px; border-radius: 20px; font-size: 0.9rem; cursor: pointer; }
+        
+        /* === 商品列表 === */
+        .container { max-width: 1200px; margin: 0 auto; padding: 20px; }
+        .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 25px; }
+        
+        /* === 商品卡片 === */
+        .card { background: white; border-radius: 12px; overflow: hidden; transition: transform 0.2s, box-shadow 0.2s; box-shadow: 0 4px 6px rgba(0,0,0,0.05); }
+        .card:hover { transform: translateY(-5px); box-shadow: 0 10px 20px rgba(0,0,0,0.1); }
+        .card img { width: 100%; height: 220px; object-fit: cover; background: #eee; }
+        .info { padding: 15px; }
+        .title { font-size: 1.1rem; font-weight: 600; margin-bottom: 5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .price { color: #e74c3c; font-size: 1.2rem; font-weight: bold; }
+        .btn-buy { width: 100%; padding: 10px; margin-top: 10px; background: #333; color: white; border: none; border-radius: 6px; cursor: pointer; transition: background 0.2s; }
+        .btn-buy:hover { background: #000; }
+
+        /* === 加载提示 === */
+        .loading { text-align: center; margin-top: 50px; color: #888; font-size: 1.2rem; }
+    </style>
+</head>
+<body>
+
+    <header>
+        <div class="logo">🧊 Icecube Store</div>
+        <div class="cart-icon">🛒 购物车</div>
+    </header>
+
+    <div class="container">
+        <!-- 加载状态 -->
+        <div id="loading" class="loading">
+            ⏳ 正在连接云端仓库...
+        </div>
+
+        <!-- 商品列表容器 -->
+        <div id="product-list" class="grid"></div>
+    </div>
+
+    <script>
+        // ==========================================
+        //  配置区：必须和后台一模一样，才能连上同一个库
+        // ==========================================
+        const APP_ID = "SKHyBQH4nGeF6PDB8MVLTMD4-MdYXbMMI";
+        const APP_KEY = "kUQ2O1stpz6V8bNhcbk2tkrV";
+        const SERVER_URL = "https://skhybqh4.api.lncldglobal.com";
+
+        // 1. 初始化
+        AV.init({ appId: APP_ID, appKey: APP_KEY, serverURL: SERVER_URL });
+
+        // 2. 从云端拉取数据
+        async function loadProducts() {
+            const query = new AV.Query('Product');
+            query.descending('createdAt'); // 最新的在最前面
+            
+            try {
+                const products = await query.find();
+                
+                // 隐藏加载提示
+                document.getElementById('loading').style.display = 'none';
+                const list = document.getElementById('product-list');
+
+                if (products.length === 0) {
+                    list.innerHTML = "<p style='text-align:center; width:100%;'>暂无商品，请店主去后台发布。</p>";
+                    return;
+                }
+
+                // 遍历并生成卡片
+                products.forEach(p => {
+                    const name = p.get('name');
+                    const price = p.get('price');
+                    const img = p.get('image');
+
+                    const card = document.createElement('div');
+                    card.className = 'card';
+                    card.innerHTML = `
+                        <img src="${img}" alt="${name}" onerror="this.src='https://via.placeholder.com/300?text=No+Image'">
+                        <div class="info">
+                            <div class="title" title="${name}">${name}</div>
+                            <div class="price">¥ ${price}</div>
+                            <button class="btn-buy" onclick="alert('已加入购物车: ${name}')">加入购物车</button>
+                        </div>
+                    `;
+                    list.appendChild(card);
+                });
+
+            } catch (error) {
+                document.getElementById('loading').innerHTML = "❌ 数据加载失败: " + error.message;
+            }
+        }
+
+        // 启动加载
+        loadProducts();
+    </script>
+
+</body>
+</html>

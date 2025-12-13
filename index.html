@@ -3,70 +3,80 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Icecube Store | 官方旗舰店</title>
+    <title>Icecube Store | 官方商城</title>
     <script src="https://cdn.jsdelivr.net/npm/leancloud-storage@4.12.0/dist/av-min.js"></script>
     <style>
-        /* === 样式区 (保持不变) === */
+        /* === 样式区 === */
         :root { --primary: #2563eb; --bg: #f3f4f6; --text: #1f2937; --red: #dc2626; }
         body { font-family: 'Segoe UI', sans-serif; background: var(--bg); margin: 0; color: var(--text); }
+        
+        /* 封禁遮罩层 */
+        #banned-screen {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: #000; color: #ff3333; z-index: 99999;
+            display: none; flex-direction: column; justify-content: center; align-items: center;
+            text-align: center;
+        }
         
         header { background: white; padding: 15px 20px; position: sticky; top: 0; z-index: 100; box-shadow: 0 1px 3px rgba(0,0,0,0.1); display: flex; justify-content: space-between; align-items: center; }
         .logo { font-size: 1.5rem; font-weight: bold; color: var(--primary); }
         .nav-right { display: flex; align-items: center; gap: 10px; }
-        .btn { padding: 8px 15px; border-radius: 20px; cursor: pointer; border: none; font-size: 0.9rem; transition: 0.2s; }
-        .btn-black { background: #111; color: white; }
-        .btn-red { background: var(--red); color: white; display: none; }
-        .btn-cart { background: var(--primary); color: white; display: flex; align-items: center; gap: 5px; }
+        .btn { padding: 8px 16px; border-radius: 6px; cursor: pointer; border: none; font-size: 14px; transition: 0.2s; }
+        .btn-login { background: #111; color: white; }
+        .btn-logout { background: var(--red); color: white; display: none; }
+        .btn-cart { background: var(--primary); color: white; }
 
         .container { max-width: 1200px; margin: 20px auto; padding: 0 20px; }
-        .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 20px; }
-        .card { background: white; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 6px rgba(0,0,0,0.05); transition: 0.2s; }
-        .card:hover { transform: translateY(-5px); }
+        .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 20px; }
+        .card { background: white; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 6px rgba(0,0,0,0.05); }
         .card img { width: 100%; height: 200px; object-fit: cover; }
         .info { padding: 15px; }
-        .title { font-weight: bold; margin-bottom: 5px; height: 24px; overflow: hidden; }
+        .title { font-weight: bold; margin-bottom: 5px; }
         .price { color: var(--red); font-size: 1.2rem; font-weight: bold; }
-        .btn-add { width: 100%; padding: 8px; background: #333; color: white; border: none; border-radius: 4px; cursor: pointer; margin-top: 10px; }
 
-        /* 购物车 & 支付 & 登录弹窗 (样式保持不变) */
-        .cart-sidebar { position: fixed; top: 0; right: -400px; width: 350px; height: 100vh; background: white; box-shadow: -5px 0 15px rgba(0,0,0,0.1); transition: right 0.3s ease; z-index: 1000; display: flex; flex-direction: column; }
-        .cart-sidebar.open { right: 0; }
-        .cart-header { padding: 20px; border-bottom: 1px solid #eee; display: flex; justify-content: space-between; font-weight: bold; }
-        .cart-items { flex: 1; overflow-y: auto; padding: 10px; }
-        .cart-item { display: flex; gap: 10px; padding: 10px; border-bottom: 1px solid #eee; align-items: center; }
-        .cart-item img { width: 50px; height: 50px; object-fit: cover; border-radius: 4px; }
-        .cart-footer { padding: 20px; border-top: 1px solid #eee; background: #f9f9f9; }
-        .btn-pay { width: 100%; padding: 12px; background: #059669; color: white; border: none; border-radius: 6px; font-size: 1rem; cursor: pointer; }
+        /* 弹窗 & 聊天 & 其他 (保持样式不变) */
         .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 2000; display: none; justify-content: center; align-items: center; }
         .modal-box { background: white; padding: 30px; border-radius: 12px; width: 320px; text-align: center; }
-        .qr-img { width: 200px; height: 200px; object-fit: contain; margin: 15px 0; border: 1px solid #eee; }
-        .auth-input { width: 100%; padding: 10px; margin: 8px 0; border: 1px solid #ddd; border-radius: 4px; box-sizing: border-box; }
-        #captcha-area { display: none; }
-        .captcha-row { display: flex; gap: 5px; align-items: center; margin: 8px 0; }
-        #captcha-canvas { border: 1px solid #ddd; cursor: pointer; }
-
-        /* === 聊天挂件 === */
+        .modal-input { width: 100%; padding: 12px; margin: 8px 0; border: 1px solid #ddd; border-radius: 6px; box-sizing: border-box; }
+        .modal-btn { width: 100%; padding: 12px; background: var(--primary); color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: bold; margin-top: 10px;}
+        .switch-text { color: var(--primary); cursor: pointer; font-size: 13px; margin-top: 15px; display: block; text-decoration: underline; }
+        .close-btn { margin-top: 10px; color: #888; cursor: pointer; display: block; font-size: 12px; }
+        
         .chat-widget { position: fixed; bottom: 20px; right: 20px; z-index: 900; }
-        .chat-icon { width: 60px; height: 60px; background: var(--primary); border-radius: 50%; color: white; display: flex; justify-content: center; align-items: center; font-size: 30px; cursor: pointer; box-shadow: 0 5px 15px rgba(37, 99, 235, 0.4); }
-        .chat-box { position: absolute; bottom: 80px; right: 0; width: 320px; height: 450px; background: white; border-radius: 12px; box-shadow: 0 5px 20px rgba(0,0,0,0.2); display: none; flex-direction: column; }
+        .chat-icon { width: 60px; height: 60px; background: var(--primary); border-radius: 50%; color: white; display: flex; justify-content: center; align-items: center; font-size: 30px; cursor: pointer; }
+        .chat-box { position: absolute; bottom: 80px; right: 0; width: 320px; height: 450px; background: white; border-radius: 12px; display: none; flex-direction: column; overflow: hidden; box-shadow: 0 5px 20px rgba(0,0,0,0.2); }
         .chat-msgs { flex: 1; padding: 10px; overflow-y: auto; background: #f9f9f9; display: flex; flex-direction: column; gap: 8px; }
         .chat-input { padding: 10px; border-top: 1px solid #eee; display: flex; gap: 5px; }
-        .msg { padding: 6px 10px; border-radius: 6px; max-width: 80%; font-size: 13px; word-wrap: break-word; }
-        .msg-me { background: #dbeafe; align-self: flex-end; color: #1e40af; }
-        .msg-other { background: #fff; align-self: flex-start; border: 1px solid #ddd; }
+        .msg { padding: 6px 10px; border-radius: 6px; max-width: 80%; font-size: 13px; }
+        .msg-me { background: #dbeafe; align-self: flex-end; } .msg-other { background: #fff; border: 1px solid #ddd; }
+        
+        /* 侧边栏购物车 */
+        .cart-sidebar { position: fixed; top: 0; right: -400px; width: 350px; height: 100vh; background: white; z-index: 1000; display: flex; flex-direction: column; transition: 0.3s; box-shadow: -5px 0 15px rgba(0,0,0,0.1); }
+        .cart-sidebar.open { right: 0; }
+        .cart-items { flex: 1; overflow-y: auto; padding: 10px; }
+        .cart-item { display: flex; gap: 10px; padding: 10px; border-bottom: 1px solid #eee; align-items: center; }
+        .cart-item img { width: 50px; height: 50px; object-fit: cover; }
+        .qr-img { width: 200px; height: 200px; object-fit: contain; }
     </style>
 </head>
 <body>
+
+    <!-- 🚫 封禁界面 (默认隐藏) -->
+    <div id="banned-screen">
+        <h1 style="font-size: 80px;">🚫</h1>
+        <h2>ACCESS DENIED</h2>
+        <p>您的设备已被永久封禁</p>
+        <p id="ban-reason" style="color: #aaa; font-size: 14px; margin-top: 20px;"></p>
+        <p style="font-size:12px; color:#555; margin-top:50px;">Device ID: <span id="did-display"></span></p>
+    </div>
 
     <header>
         <div class="logo">🧊 Icecube Store</div>
         <div class="nav-right">
             <span id="user-name" style="font-size:14px; font-weight:bold; color:#666"></span>
-            <button class="btn btn-black" id="btn-login" onclick="openAuth()">登录 / 注册</button>
-            <button class="btn btn-red" id="btn-logout" onclick="logout()">退出</button>
-            <button class="btn btn-cart" onclick="toggleCart()">
-                🛒 <span id="cart-count" style="background:white; color:var(--primary); padding:1px 6px; border-radius:10px; font-size:0.8rem;">0</span>
-            </button>
+            <button class="btn btn-login" id="btn-login" onclick="openModal()">登录 / 注册</button>
+            <button class="btn btn-logout" id="btn-logout" onclick="logout()">退出</button>
+            <button class="btn btn-cart" onclick="toggleCart()">🛒 <span id="cart-count">0</span></button>
         </div>
     </header>
 
@@ -75,56 +85,33 @@
         <div id="product-list" class="grid">加载中...</div>
     </div>
 
-    <!-- 购物车 -->
+    <!-- 弹窗组件 (购物车/支付/登录/聊天) -->
     <div class="cart-sidebar" id="sidebar">
-        <div class="cart-header"><span>我的购物车</span> <span onclick="toggleCart()" style="cursor:pointer">✕</span></div>
+        <div style="padding:20px; font-weight:bold; display:flex; justify-content:space-between"><span>购物车</span><span onclick="toggleCart()" style="cursor:pointer">✕</span></div>
         <div class="cart-items" id="cart-list"></div>
-        <div class="cart-footer">
-            <div style="display:flex; justify-content:space-between; margin-bottom:10px;"><span>总计:</span> <span style="color:red; font-weight:bold;">¥ <span id="total-price">0</span></span></div>
-            <button class="btn-pay" onclick="showPay()">去支付</button>
-        </div>
+        <div style="padding:20px; background:#f9f9f9"><button class="btn btn-cart" style="width:100%" onclick="showPay()">去支付 (¥<span id="total-price">0</span>)</button></div>
     </div>
 
-    <!-- 支付弹窗 -->
     <div class="modal-overlay" id="pay-modal">
-        <div class="modal-box">
-            <h3>📲 扫码支付</h3>
-            <p style="font-size:1.5rem; color:red; font-weight:bold;">¥ <span id="pay-amount">0</span></p>
-            <img id="qr-img" class="qr-img" src="" alt="加载中...">
-            <button class="btn btn-black" onclick="document.getElementById('pay-modal').style.display='none'">关闭</button>
-        </div>
+        <div class="modal-box"><h3>扫码支付</h3><img id="qr-img" class="qr-img"><br><button class="btn btn-login" onclick="document.getElementById('pay-modal').style.display='none'">关闭</button></div>
     </div>
 
-    <!-- 登录/注册 -->
     <div class="modal-overlay" id="auth-modal">
         <div class="modal-box">
-            <h2 id="auth-title">账号登录</h2>
-            <input id="u-email" class="auth-input" placeholder="邮箱">
-            <input id="u-pass" type="password" class="auth-input" placeholder="密码">
-            <div id="captcha-area">
-                <div class="captcha-row">
-                    <input id="c-input" class="auth-input" placeholder="验证码" style="margin:0">
-                    <canvas id="captcha-canvas" width="100" height="40" onclick="drawC()"></canvas>
-                </div>
-            </div>
-            <button class="btn btn-cart" style="width:100%; margin-top:10px; padding:10px;" onclick="submitAuth()" id="auth-btn">登录</button>
-            <div style="margin-top:10px; color:blue; cursor:pointer; font-size:13px; text-decoration:underline" onclick="toggleAuthMode()" id="switch-txt">没有账号？去注册</div>
-            <div style="margin-top:5px; color:#888; cursor:pointer; font-size:12px;" onclick="document.getElementById('auth-modal').style.display='none'">关闭</div>
+            <h2 id="auth-title">登录</h2>
+            <input id="u-email" class="modal-input" placeholder="邮箱">
+            <input id="u-pass" type="password" class="modal-input" placeholder="密码">
+            <button class="modal-btn" onclick="submitAuth()" id="auth-btn">登录</button>
+            <span class="switch-text" onclick="toggleAuthMode()">切换注册/登录</span>
+            <span class="close-btn" onclick="document.getElementById('auth-modal').style.display='none'">关闭</span>
         </div>
     </div>
 
-    <!-- 聊天挂件 -->
     <div class="chat-widget">
         <div class="chat-box" id="chat-win">
-            <div style="background:var(--primary); color:white; padding:10px; font-weight:bold; display:flex; justify-content:space-between;">
-                <span>💬 私信客服</span>
-                <span style="cursor:pointer" onclick="toggleChat()">✕</span>
-            </div>
-            <div class="chat-msgs" id="chat-history"></div>
-            <div class="chat-input">
-                <input id="chat-txt" style="flex:1; padding:5px;" placeholder="发送私信...">
-                <button onclick="sendMsg()" style="background:var(--primary); color:white; border:none; padding:0 10px;">发送</button>
-            </div>
+            <div style="background:var(--primary); color:white; padding:10px; display:flex; justify-content:space-between;"><span>客服</span><span onclick="toggleChat()" style="cursor:pointer">✕</span></div>
+            <div class="chat-msgs" id="chat-hist"></div>
+            <div class="chat-input"><input id="chat-txt" style="flex:1" placeholder="..."><button onclick="sendMsg()">发</button></div>
         </div>
         <div class="chat-icon" onclick="toggleChat()">💬</div>
     </div>
@@ -133,141 +120,127 @@
         const CONFIG = { appId: "SKHyBQH4nGeF6PDB8MVLTMD4-MdYXbMMI", appKey: "kUQ2O1stpz6V8bNhcbk2tkrV", serverURL: "https://skhybqh4.api.lncldglobal.com" };
         AV.init(CONFIG);
 
-        let cart = JSON.parse(localStorage.getItem('myCart') || '[]');
-        let isReg = false; let realC = "";
+        // 获取或生成设备指纹
+        let deviceId = localStorage.getItem('ice_did');
+        if (!deviceId) {
+            deviceId = 'dev_' + Math.random().toString(36).substr(2, 9) + Date.now().toString(36);
+            localStorage.setItem('ice_did', deviceId);
+        }
+        document.getElementById('did-display').innerText = deviceId;
 
-        checkUser();
-        loadProducts();
-        updateCartUI();
-        setInterval(loadChat, 3000); // 轮询聊天
-
-        // === 购物车 ===
-        function addToCart(item) {
-            if(!AV.User.current()) return openAuth();
-            const ex = cart.find(x => x.id === item.id);
-            if(ex) ex.count++; else cart.push({...item, count: 1});
-            saveCart(); toggleCart(true);
-        }
-        function saveCart() { localStorage.setItem('myCart', JSON.stringify(cart)); updateCartUI(); }
-        function toggleCart(force) { 
-            const sb = document.getElementById('sidebar'); 
-            if(force) sb.classList.add('open'); else sb.classList.toggle('open'); 
-        }
-        function updateCartUI() {
-            document.getElementById('cart-count').innerText = cart.reduce((a,b)=>a+b.count,0);
-            const list = document.getElementById('cart-list'); list.innerHTML = "";
-            let total = 0;
-            cart.forEach((it, idx) => {
-                total += it.price * it.count;
-                list.innerHTML += `<div class="cart-item"><img src="${it.image}"><div style="flex:1"><div>${it.name}</div><div style="color:red">¥ ${it.price}</div></div><button onclick="changeQty(${idx}, -1)">-</button> ${it.count} <button onclick="changeQty(${idx}, 1)">+</button></div>`;
-            });
-            document.getElementById('total-price').innerText = total;
-        }
-        function changeQty(i, d) { cart[i].count+=d; if(cart[i].count<=0) cart.splice(i,1); saveCart(); }
-        
-        async function showPay() {
-            const total = document.getElementById('total-price').innerText;
-            if(total == 0) return alert("空购物车");
-            document.getElementById('pay-modal').style.display = 'flex';
-            document.getElementById('pay-amount').innerText = total;
-            const q = new AV.Query('GlobalConfig'); const c = await q.first();
-            document.getElementById('qr-img').src = c ? c.get('paymentQR') : "";
-        }
-
-        // === 用户 ===
-        function checkUser() {
-            const u = AV.User.current();
-            if(u) {
-                document.getElementById('user-name').innerText = u.getUsername();
-                document.getElementById('btn-login').style.display='none';
-                document.getElementById('btn-logout').style.display='block';
+        // === 1. 核心安全检查 (开局雷击) ===
+        async function checkDeviceBan() {
+            const q = new AV.Query('DeviceBlacklist');
+            q.equalTo('deviceId', deviceId);
+            const res = await q.first();
+            if (res) {
+                // 发现设备被封，直接锁死屏幕
+                document.getElementById('banned-screen').style.display = 'flex';
+                document.getElementById('ban-reason').innerText = "原因: " + (res.get('reason') || "违反平台规定");
+                AV.User.logOut(); // 强制登出
+                throw new Error("Device Banned"); // 停止后续脚本运行
             }
         }
-        function logout() { AV.User.logOut(); location.reload(); }
-        function openAuth() { document.getElementById('auth-modal').style.display='flex'; }
-        function toggleAuthMode() {
-            isReg = !isReg;
-            document.getElementById('auth-title').innerText = isReg ? "注册" : "登录";
-            document.getElementById('auth-btn').innerText = isReg ? "提交注册" : "登录";
-            document.getElementById('switch-txt').innerText = isReg ? "返回登录" : "去注册";
-            document.getElementById('captcha-area').style.display = isReg ? 'block' : 'none';
-            if(isReg) drawC();
+
+        // 立即执行检查
+        checkDeviceBan().then(() => {
+            // 如果没被封，才加载其他内容
+            checkUser();
+            loadProducts();
+            updateCartUI();
+            setInterval(loadChat, 3000);
+        }).catch(e => console.error(e));
+
+        // === 2. 账号检查 + 毒丸策略 ===
+        async function checkAccountBan(email) {
+            // 查账号是否在黑名单
+            const q = new AV.Query('Blacklist');
+            q.equalTo('email', email);
+            const count = await q.count();
+            
+            if (count > 0) {
+                // ⚠️ 发现是黑名单账号，立即“毒死”当前设备
+                await poisonDevice(email);
+                return true;
+            }
+            return false;
         }
-        function drawC() {
-            const ctx = document.getElementById('captcha-canvas').getContext('2d');
-            ctx.fillStyle='#eee'; ctx.fillRect(0,0,100,40);
-            const s='ABCDEFGHJKLMNPQRSTUVWXYZ23456789'; realC='';
-            for(let i=0;i<4;i++) realC+=s[Math.floor(Math.random()*s.length)];
-            ctx.fillStyle='#333'; ctx.font='20px Arial'; ctx.fillText(realC, 25, 28);
+
+        async function poisonDevice(email) {
+            // 检查是否已经毒过了
+            const q = new AV.Query('DeviceBlacklist');
+            q.equalTo('deviceId', deviceId);
+            if (await q.count() === 0) {
+                const Ban = AV.Object.extend('DeviceBlacklist');
+                const b = new Ban();
+                b.set('deviceId', deviceId);
+                b.set('reason', `关联了被封禁账号: ${email}`);
+                b.set('deviceInfo', navigator.userAgent); // 记录设备信息
+                b.set('associatedEmail', email);
+                await b.save();
+            }
+            alert("🚫 检测到异常账号，此设备已被永久封禁！");
+            location.reload(); // 刷新后触发 checkDeviceBan，锁死屏幕
         }
+
+        // === 3. 认证逻辑 (修改后) ===
+        let isReg = false;
+        function toggleAuthMode() { isReg=!isReg; document.getElementById('auth-title').innerText=isReg?"注册":"登录"; document.getElementById('auth-btn').innerText=isReg?"注册":"登录"; }
+        function openModal() { document.getElementById('auth-modal').style.display='flex'; }
+        
         async function submitAuth() {
             const e = document.getElementById('u-email').value;
             const p = document.getElementById('u-pass').value;
+            if(!e || !p) return;
+
             try {
                 if(isReg) {
-                    if(document.getElementById('c-input').value.toUpperCase()!==realC) return alert("验证码错");
-                    // 云端风控
-                    const fp = localStorage.getItem('did') || Math.random().toString(36); localStorage.setItem('did', fp);
-                    const lq = new AV.Query('RegistrationLog'); lq.equalTo('fingerprint', fp); lq.descending('createdAt');
-                    const log = await lq.first();
-                    if(log && (Date.now()-log.createdAt.getTime()<600000)) throw new Error("注册太频繁，请稍后再试");
-
+                    // 注册前也检查一下设备
+                    await checkDeviceBan();
                     const u = new AV.User(); u.setUsername(e); u.setPassword(p); u.setEmail(e);
-                    await u.signUp();
-                    const Log = AV.Object.extend('RegistrationLog'); const l = new Log(); l.set('email', e); l.set('fingerprint', fp); await l.save();
-                    alert("注册成功，请去邮箱激活"); toggleAuthMode();
+                    await u.signUp(); alert("注册成功，请激活邮箱");
                 } else {
+                    // 登录
                     await AV.User.logIn(e, p);
-                    const q = new AV.Query('Blacklist'); q.equalTo('email', e);
-                    if(await q.count()>0) { alert("已封禁"); AV.User.logOut(); return; }
+                    
+                    // 登录成功后，立刻检查这个账号是不是黑名单
+                    // 如果是，checkAccountBan 会触发 poisonDevice，把这台电脑封掉
+                    if (await checkAccountBan(e)) return; 
+
+                    if(AV.User.current().get('emailVerified')===false){ alert("邮箱未验证"); AV.User.logOut(); return; }
                     location.reload();
                 }
-            } catch(err) { alert(err.message); if(isReg) drawC(); }
+            } catch(err) { alert(err.message); }
         }
 
-        // === 聊天 (私信模式) ===
-        function toggleChat() { 
-            const w = document.getElementById('chat-win'); 
-            w.style.display = w.style.display==='flex'?'none':'flex';
-            if(w.style.display==='flex') loadChat();
+        // === 购物车 & 商品 (保留) ===
+        let cart = JSON.parse(localStorage.getItem('myCart') || '[]');
+        function addToCart(item) { if(!AV.User.current())return openModal(); const ex=cart.find(x=>x.id===item.id); if(ex)ex.count++; else cart.push({...item,count:1}); saveCart(); toggleCart(true); }
+        function saveCart() { localStorage.setItem('myCart', JSON.stringify(cart)); updateCartUI(); }
+        function toggleCart(f) { const s=document.getElementById('sidebar'); if(f)s.classList.add('open'); else s.classList.toggle('open'); }
+        function updateCartUI() {
+            document.getElementById('cart-count').innerText = cart.reduce((a,b)=>a+b.count,0);
+            const l = document.getElementById('cart-list'); l.innerHTML=""; let t=0;
+            cart.forEach((i,idx)=>{ t+=i.price*i.count; l.innerHTML+=`<div class="cart-item"><img src="${i.image}"><div>${i.name}<br>¥${i.price}</div><button onclick="chQ(${idx},1)">+</button>${i.count}<button onclick="chQ(${idx},-1)">-</button></div>` });
+            document.getElementById('total-price').innerText=t;
         }
-        async function sendMsg() {
-            if(!AV.User.current()) return alert("请先登录");
-            const q = new AV.Query('Blacklist'); q.equalTo('email', AV.User.current().getUsername());
-            if(await q.count()>0) { alert("已封禁"); AV.User.logOut(); return; }
-
-            const t = document.getElementById('chat-txt').value; if(!t) return;
-            const C = AV.Object.extend('ChatMessage'); const m = new C();
-            m.set('content', t); 
-            m.set('senderName', AV.User.current().getUsername()); 
-            m.set('channel', AV.User.current().getUsername()); // 关键：频道设为自己的用户名
-            m.set('isAdmin', false);
-            await m.save(); document.getElementById('chat-txt').value=''; loadChat();
+        function chQ(i,d){ cart[i].count+=d; if(cart[i].count<=0)cart.splice(i,1); saveCart(); }
+        async function showPay() {
+            if(document.getElementById('total-price').innerText=="0") return;
+            document.getElementById('pay-modal').style.display='flex';
+            const q=new AV.Query('GlobalConfig'); const c=await q.first(); document.getElementById('qr-img').src=c?c.get('paymentQR'):"";
         }
-        async function loadChat() {
-            if(document.getElementById('chat-win').style.display==='none' || !AV.User.current()) return;
-            const myName = AV.User.current().getUsername();
-            const q = new AV.Query('ChatMessage'); 
-            q.equalTo('channel', myName); // 只看自己的频道
-            q.ascending('createdAt'); q.limit(20);
-            const ms = await q.find();
-            const d = document.getElementById('chat-history'); d.innerHTML="";
-            ms.forEach(m => {
-                const isAdmin = m.get('isAdmin');
-                d.innerHTML+=`<div class="msg ${isAdmin?'msg-other':'msg-me'}"><b>${isAdmin?'客服':m.get('senderName')}:</b> ${m.get('content')}</div>`;
-            });
-        }
-
-        // === 加载商品 ===
         async function loadProducts() {
-            const q = new AV.Query('Product'); q.descending('createdAt');
-            const res = await q.find();
-            const div = document.getElementById('product-list'); div.innerHTML="";
-            res.forEach(p => {
-                const item = { id:p.id, name:p.get('name'), price:p.get('price'), image:p.get('image') };
-                div.innerHTML += `<div class="card"><img src="${item.image}"><div class="info"><div class="title">${item.name}</div><div class="price">¥${item.price}</div><button class="btn-add" onclick='addToCart(${JSON.stringify(item)})'>+ 购物车</button></div></div>`;
-            });
+            const q = new AV.Query('Product'); q.descending('createdAt'); const res = await q.find();
+            document.getElementById('product-list').innerHTML = res.map(p=>`<div class="card"><img src="${p.get('image')}"><div class="info"><div class="title">${p.get('name')}</div><div class="price">¥${p.get('price')}</div><button class="btn-add" onclick='addToCart({id:"${p.id}",name:"${p.get('name')}",price:${p.get('price')},image:"${p.get('image')}"})'>+ 购物车</button></div></div>`).join('');
         }
+
+        // === 聊天 & 用户 ===
+        function checkUser() { const u=AV.User.current(); if(u){ document.getElementById('user-name').innerText=u.getUsername(); document.getElementById('btn-login').style.display='none'; document.getElementById('btn-logout').style.display='block'; } }
+        function logout() { AV.User.logOut(); location.reload(); }
+        function toggleChat() { const w=document.getElementById('chat-win'); w.style.display=w.style.display==='flex'?'none':'flex'; if(w.style.display==='flex')loadChat(); }
+        async function sendMsg() { if(await checkDeviceBan())return; const t=document.getElementById('chat-txt').value; if(!t)return; const O=AV.Object.extend('ChatMessage'); const m=new O(); m.set('content',t); m.set('senderName',AV.User.current().getUsername()); m.set('channel',AV.User.current().getUsername()); m.set('isAdmin',false); await m.save(); document.getElementById('chat-txt').value=''; loadChat(); }
+        async function loadChat() { if(!AV.User.current())return; const q=new AV.Query('ChatMessage'); q.equalTo('channel',AV.User.current().getUsername()); q.ascending('createdAt'); const res=await q.find(); document.getElementById('chat-hist').innerHTML=res.map(m=>`<div class="msg ${m.get('isAdmin')?'msg-other':'msg-me'}">${m.get('content')}</div>`).join(''); }
     </script>
 </body>
 </html>

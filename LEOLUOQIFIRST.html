@@ -2,317 +2,203 @@
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
-    <title>Icecube Pro Admin</title>
+    <title>Icecube Master</title>
     <script src="https://cdn.jsdelivr.net/npm/leancloud-storage@4.12.0/dist/av-min.js"></script>
     <style>
-        /* === UI 系统 === */
-        body { font-family: 'Segoe UI', monospace; background: #0d1117; color: #c9d1d9; display: flex; height: 100vh; margin: 0; overflow: hidden; }
-        ::-webkit-scrollbar { width: 8px; } ::-webkit-scrollbar-thumb { background: #30363d; border-radius: 4px; }
-        
-        /* 侧边栏 */
-        .sidebar { width: 220px; background: #161b22; border-right: 1px solid #30363d; padding: 20px; display: flex; flex-direction: column; gap: 10px; flex-shrink: 0; }
-        .sidebar h2 { color: #58a6ff; margin: 0 0 20px 0; text-align: center; letter-spacing: 1px; }
-        .nav-btn { padding: 12px; background: transparent; color: #8b949e; border: none; text-align: left; cursor: pointer; border-radius: 6px; font-weight: 600; transition: 0.2s; }
-        .nav-btn:hover, .nav-btn.active { background: #21262d; color: #fff; }
-        .nav-btn.logout { margin-top: auto; color: #f85149; }
-
-        /* 主内容区 */
-        .main { flex: 1; padding: 30px; overflow-y: auto; display: none; }
+        body { font-family: 'Segoe UI', monospace; background: #0d1117; color: #c9d1d9; display: flex; height: 100vh; margin: 0; }
+        .sidebar { width: 200px; background: #161b22; border-right: 1px solid #30363d; padding: 20px; display: flex; flex-direction: column; gap: 10px; }
+        .nav-btn { padding: 12px; background: transparent; color: #8b949e; border: none; text-align: left; cursor: pointer; border-radius: 6px; }
+        .nav-btn.active { background: #21262d; color: #fff; }
+        .main { flex: 1; padding: 20px; overflow-y: auto; display: none; }
         .main.active { display: block; }
         
-        /* 通用组件 */
-        input, textarea { width: 100%; padding: 12px; background: #0d1117; border: 1px solid #30363d; color: white; margin-bottom: 15px; box-sizing: border-box; border-radius: 6px; }
-        input:focus, textarea:focus { border-color: #58a6ff; outline: none; }
-        button { padding: 10px 20px; background: #238636; color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: bold; }
-        button:hover { filter: brightness(1.1); }
-        .btn-sm { padding: 6px 12px; font-size: 12px; }
-        .btn-blue { background: #1f6feb; }
-        .btn-red { background: #da3633; }
-
-        /* 表格 */
-        table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 14px; }
-        th, td { border: 1px solid #30363d; padding: 12px; text-align: left; }
-        th { background: #21262d; color: #fff; }
-        tr:hover { background: #1c2128; }
-
-        /* === 订单详情弹窗 === */
-        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 999; display: none; justify-content: center; align-items: center; }
-        .modal { background: #161b22; width: 600px; max-height: 80vh; border-radius: 12px; border: 1px solid #30363d; display: flex; flex-direction: column; overflow: hidden; }
-        .modal-head { padding: 20px; border-bottom: 1px solid #30363d; display: flex; justify-content: space-between; align-items: center; font-size: 18px; font-weight: bold; color: #fff; }
-        .modal-body { padding: 20px; overflow-y: auto; }
-        .order-detail-item { display: flex; gap: 15px; margin-bottom: 15px; border-bottom: 1px dashed #30363d; padding-bottom: 10px; }
-        .order-detail-item img { width: 60px; height: 60px; object-fit: cover; border-radius: 4px; }
-        .detail-info { flex: 1; }
-
-        /* === 独立聊天布局 (微信式) === */
-        .chat-layout { display: flex; height: 100%; border: 1px solid #30363d; border-radius: 8px; overflow: hidden; }
-        .chat-sidebar { width: 250px; background: #161b22; border-right: 1px solid #30363d; overflow-y: auto; }
-        .chat-main { flex: 1; display: flex; flex-direction: column; background: #0d1117; }
-        
-        .contact-item { padding: 15px; border-bottom: 1px solid #21262d; cursor: pointer; transition: 0.2s; }
+        /* 聊天布局 */
+        .chat-layout { display: flex; height: 100%; border: 1px solid #30363d; border-radius: 8px; }
+        .chat-left { width: 250px; background: #161b22; border-right: 1px solid #30363d; overflow-y: auto; }
+        .chat-right { flex: 1; display: flex; flex-direction: column; background: #0d1117; }
+        .contact-item { padding: 15px; border-bottom: 1px solid #21262d; cursor: pointer; }
         .contact-item:hover, .contact-item.active { background: #21262d; }
-        .contact-name { font-weight: bold; color: #fff; margin-bottom: 5px; font-size: 14px; }
-        .contact-last { font-size: 12px; color: #8b949e; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .contact-public { border-left: 4px solid #58a6ff; }
+        .contact-private { border-left: 4px solid #a371f7; }
         
-        .msg-area { flex: 1; padding: 20px; overflow-y: auto; display: flex; flex-direction: column; gap: 15px; }
-        .msg-row { display: flex; align-items: flex-end; gap: 10px; }
-        .msg-row.me { flex-direction: row-reverse; }
-        .bubble { padding: 10px 15px; border-radius: 10px; max-width: 70%; word-break: break-all; font-size: 14px; position: relative; }
-        .bubble-user { background: #21262d; border: 1px solid #30363d; color: #c9d1d9; border-bottom-left-radius: 0; }
-        .bubble-admin { background: #1f6feb; color: white; border-bottom-right-radius: 0; }
-        .chat-input-box { padding: 15px; background: #161b22; border-top: 1px solid #30363d; display: flex; gap: 10px; }
-        .del-msg { font-size: 12px; color: #da3633; cursor: pointer; margin-left: 5px; font-weight: bold; }
+        .chat-row { display: flex; gap: 10px; margin-bottom: 10px; }
+        .chat-bubble { padding: 8px 12px; border-radius: 8px; max-width: 70%; font-size: 0.9rem; }
+        .bubble-user { background: #21262d; border: 1px solid #30363d; }
+        .bubble-admin { background: #1f6feb; color: white; margin-left: auto; }
+        .del-msg { color: #da3633; cursor: pointer; font-size: 12px; margin-left: 5px; }
 
-        /* 登录层 */
-        #login-overlay { position: fixed; top:0; left:0; width:100%; height:100%; background:#0d1117; z-index:9999; display:flex; justify-content:center; align-items:center; }
-        .login-box { background:#161b22; padding:40px; border:1px solid #30363d; width:350px; border-radius: 12px; box-shadow: 0 20px 50px rgba(0,0,0,0.5); }
+        input, textarea { width: 100%; padding: 10px; background: #0d1117; border: 1px solid #30363d; color: white; margin-bottom: 10px; box-sizing: border-box; }
+        button { padding: 10px; background: #238636; color: white; border: none; border-radius: 6px; cursor: pointer; width: 100%; }
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+        th, td { border: 1px solid #30363d; padding: 10px; text-align: left; }
+        #login-overlay { position: fixed; top:0; left:0; width:100%; height:100%; background:#0d1117; z-index:999; display:flex; justify-content:center; align-items:center; }
+        .login-box { background:#161b22; padding:40px; border:1px solid #30363d; width:300px; }
     </style>
 </head>
 <body>
 
-    <!-- 登录层 -->
-    <div id="login-overlay">
-        <div class="login-box">
-            <h2 style="text-align:center; color:#58a6ff">MASTER CONTROL</h2>
-            <input id="l-email" placeholder="Admin Email" value="lluoqi816@gmail.com">
-            <input type="password" id="l-pass" placeholder="Password">
-            <input type="password" id="l-token" placeholder="Secure Token (100 chars)">
-            <button onclick="doLogin()" style="width:100%">LOGIN</button>
-        </div>
-    </div>
+    <div id="login-overlay"><div class="login-box"><h2 style="text-align:center">MASTER LOGIN</h2><input id="l-email" placeholder="Email"><input type="password" id="l-pass" placeholder="Password"><input type="password" id="l-token" placeholder="RSA Token"><button onclick="doLogin()">AUTHENTICATE</button></div></div>
 
-    <!-- 侧边栏 -->
     <div class="sidebar">
-        <h2>ICECUBE</h2>
+        <h2 style="color:#58a6ff; text-align:center">ADMIN</h2>
         <button class="nav-btn active" onclick="switchTab('orders')">🧾 订单管理</button>
         <button class="nav-btn" onclick="switchTab('chat')">💬 独立客服</button>
         <button class="nav-btn" onclick="switchTab('products')">📦 商品管理</button>
-        <button class="nav-btn" onclick="switchTab('users')">👥 用户风控</button>
+        <button class="nav-btn" onclick="switchTab('users')">👥 用户管理</button>
         <button class="nav-btn" onclick="switchTab('notices')">📢 公告发布</button>
-        <button class="nav-btn logout" onclick="AV.User.logOut();location.reload()">退出系统</button>
+        <button class="nav-btn" style="margin-top:auto; color:red" onclick="AV.User.logOut();location.reload()">退出</button>
     </div>
 
-    <!-- 1. 订单管理 -->
+    <!-- 订单 -->
     <div id="tab-orders" class="main active">
-        <h3>🧾 订单中心</h3>
-        <button onclick="loadOrders()" class="btn-sm btn-blue">刷新订单</button>
-        <table>
-            <thead><tr><th>时间</th><th>买家</th><th>金额</th><th>状态</th><th>详情</th><th>操作</th></tr></thead>
-            <tbody id="order-table"></tbody>
-        </table>
+        <h3>🧾 订单列表</h3><button onclick="loadOrders()" style="width:auto">刷新</button>
+        <table><thead><tr><th>时间</th><th>用户</th><th>总价</th><th>状态</th><th>操作</th></tr></thead><tbody id="order-table"></tbody></table>
     </div>
 
-    <!-- 2. 独立客服 (微信式) -->
-    <div id="tab-chat" class="main" style="padding: 0; display: none;">
+    <!-- 聊天 -->
+    <div id="tab-chat" class="main" style="padding:0">
         <div class="chat-layout">
-            <!-- 左侧联系人 -->
-            <div class="chat-sidebar" id="contact-list">
-                <div style="padding:20px; color:#666; text-align:center">正在加载联系人...</div>
+            <div class="chat-left" id="contact-list">
+                <!-- 列表由JS生成 -->
             </div>
-            <!-- 右侧对话框 -->
-            <div class="chat-main">
-                <div id="chat-header" style="padding:15px; border-bottom:1px solid #30363d; font-weight:bold; color:#58a6ff">请选择左侧联系人</div>
-                <div class="msg-area" id="msg-area"></div>
-                <div class="chat-input-box">
-                    <input id="reply-txt" placeholder="输入回复内容..." style="margin:0">
+            <div class="chat-right">
+                <div id="chat-header" style="padding:15px; border-bottom:1px solid #30363d; color:#58a6ff; font-weight:bold">请选择左侧会话</div>
+                <div id="chat-msgs" style="flex:1; overflow-y:auto; padding:20px;"></div>
+                <div style="padding:15px; background:#161b22; display:flex; gap:10px">
+                    <input id="reply-txt" placeholder="回复内容..." style="margin:0">
                     <button onclick="sendReply()" style="width:100px;">发送</button>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- 3. 商品管理 -->
-    <div id="tab-products" class="main">
-        <h3>📦 商品管理</h3>
-        <div style="background:#161b22; padding:20px; border-radius:8px; border:1px solid #30363d">
-            <h4 style="margin-top:0; color:#58a6ff">快速发布/修改</h4>
-            <div id="edit-form">
-                <input id="p-name" placeholder="商品名称">
-                <div style="display:flex; gap:10px">
-                    <input id="p-price" type="number" placeholder="价格">
-                    <input id="qr-url" placeholder="收款码链接 (Global Setting)">
-                </div>
-                <textarea id="p-img" rows="3" placeholder="图片链接 (多张用逗号隔开)"></textarea>
-                <div style="display:flex; gap:10px">
-                    <button onclick="handleProduct()" id="submit-btn" class="btn-blue" style="flex:1">发布商品</button>
-                    <button onclick="saveQR()" class="btn-sm" style="background:#333">更新收款码</button>
-                    <button onclick="cancelEdit()" id="cancel-btn" style="background:#333; display:none">取消编辑</button>
-                </div>
-            </div>
-        </div>
-        <h4 style="margin-top:20px">已上架商品</h4>
-        <div id="prod-list"></div>
-    </div>
-
-    <!-- 4. 用户风控 -->
-    <div id="tab-users" class="main">
-        <h3>👥 用户与风控</h3>
-        <div style="display:flex; gap:10px; margin-bottom:20px;">
-            <input id="unblock-id" placeholder="输入邮箱解除 10分钟注册限制" style="margin:0; width:300px;">
-            <button onclick="liftBan()" class="btn-blue" style="width:auto">解除限制</button>
-        </div>
-        <button onclick="loadUsers()" class="btn-sm">刷新列表</button>
-        <table>
-            <thead><tr><th>Email</th><th>ID</th><th>注册时间</th><th>状态/操作</th></tr></thead>
-            <tbody id="user-table"></tbody>
-        </table>
-    </div>
-
-    <!-- 5. 公告发布 -->
-    <div id="tab-notices" class="main">
-        <h3>📢 发布全站公告</h3>
-        <textarea id="notice-txt" rows="5" placeholder="输入公告内容，发布后所有用户可见..."></textarea>
-        <button onclick="postNotice()" class="btn-blue">立即发布</button>
-        <h4 style="margin-top:30px">历史公告</h4>
-        <div id="notice-list"></div>
-    </div>
-
-    <!-- 订单详情弹窗 -->
-    <div class="modal-overlay" id="order-modal">
-        <div class="modal">
-            <div class="modal-head"><span>订单详情</span><span onclick="document.getElementById('order-modal').style.display='none'" style="cursor:pointer">✕</span></div>
-            <div class="modal-body" id="order-details-body"></div>
-            <div style="padding:20px; border-top:1px solid #30363d; text-align:right">
-                <button class="btn-red" onclick="document.getElementById('order-modal').style.display='none'">关闭</button>
-            </div>
-        </div>
-    </div>
+    <!-- 其他Tab (商品/用户/公告 - 简化版保留功能) -->
+    <div id="tab-products" class="main"><h3>商品</h3><div id="edit-form"><input id="p-name" placeholder="名称"><input id="p-price" placeholder="价格"><textarea id="p-img" placeholder="图片"></textarea><button onclick="handleProduct()">发布</button></div><div id="prod-list"></div></div>
+    <div id="tab-users" class="main"><h3>用户</h3><button onclick="loadUsers()" style="width:auto">刷新</button><table><tbody id="user-table"></tbody></table></div>
+    <div id="tab-notices" class="main"><h3>公告</h3><textarea id="notice-txt" placeholder="内容"></textarea><button onclick="postNotice()">发布</button><div id="notice-list"></div></div>
 
     <script>
         const CONFIG = { appId: "SKHyBQH4nGeF6PDB8MVLTMD4-MdYXbMMI", appKey: "kUQ2O1stpz6V8bNhcbk2tkrV", serverURL: "https://skhybqh4.api.lncldglobal.com" };
         AV.init(CONFIG);
 
-        let currentChatUser = null; 
-        let editingId = null;
+        let currentChannel = null; // 当前选中的聊天频道 (null=未选, 'public'=公屏)
         let chatTimer = null;
 
-        // === 登录 ===
         async function doLogin() {
             const e=document.getElementById('l-email').value, p=document.getElementById('l-pass').value, t=document.getElementById('l-token').value;
             try {
-                const q=new AV.Query('SecureToken'); const r=await q.first(); 
-                if(!r || r.get('content')!==t) return alert("❌ Token 错误");
-                await AV.User.logIn(e,p);
-                document.getElementById('login-overlay').style.display='none';
-                initData();
-            } catch(err) { alert("登录失败: " + err.message); }
+                const q=new AV.Query('SecureToken'); const r=await q.first(); if(!r||r.get('content')!==t) return alert("Token Error");
+                await AV.User.logIn(e,p); document.getElementById('login-overlay').style.display='none'; initData();
+            } catch(err) { alert("Login Failed"); }
         }
-        function initData() { loadOrders(); loadProducts(); loadUsers(); loadNotices(); loadContactList(); loadQR(); }
-        
+        function initData() { loadOrders(); loadProducts(); loadUsers(); loadNotices(); loadContactList(); }
         function switchTab(t) {
             document.querySelectorAll('.main').forEach(m=>m.classList.remove('active'));
             document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('active'));
             document.getElementById('tab-'+t).classList.add('active');
-            
-            // 切换时刷新对应数据
-            if(t==='orders') loadOrders();
-            if(t==='chat') { loadContactList(); startChatPoll(); } else { stopChatPoll(); }
-            if(t==='users') loadUsers();
-            if(t==='notices') loadNotices();
+            if(t==='chat') { loadContactList(); chatTimer=setInterval(loadChatMsgs, 3000); } else { clearInterval(chatTimer); }
+            if(t==='orders') loadOrders(); if(t==='users') loadUsers(); if(t==='notices') loadNotices();
         }
 
-        // =======================
-        // 1. 订单管理
-        // =======================
-        async function loadOrders() {
-            const d=document.getElementById('order-table'); d.innerHTML="Loading...";
-            const q=new AV.Query('Order'); q.descending('createdAt'); const res=await q.find(); d.innerHTML="";
-            res.forEach(o => {
-                const u = o.get('email') || "未知";
-                const s = o.get('status');
-                const btn = s==='pending' ? `<button class="btn-sm btn-blue" onclick="confirmOrder('${o.id}')">确认收款</button>` : `<span style="color:#2ea043">✅ 完成</span>`;
-                d.innerHTML += `<tr><td>${o.createdAt.toLocaleString()}</td><td>${u}</td><td style="color:#f85149;font-weight:bold">¥${o.get('total')}</td><td>${s==='pending'?'⏳ 待处理':'✅ 已完成'}</td><td><button class="btn-sm" onclick="showOrder('${o.id}')">查看详情</button></td><td>${btn}</td></tr>`;
-            });
-        }
-        async function showOrder(id) {
-            const q = new AV.Query('Order'); const o = await q.get(id); const items = o.get('items');
-            let html = `<div style="margin-bottom:20px; color:#8b949e">订单号: ${o.id}<br>买家: ${o.get('email')}<br>时间: ${o.createdAt.toLocaleString()}</div>`;
-            items.forEach(i => { html += `<div class="order-detail-item"><img src="${i.image}" onerror="this.src='https://via.placeholder.com/60'"><div class="detail-info"><div style="font-weight:bold; color:#fff">${i.name}</div><div style="color:#f85149">¥${i.price} x ${i.count}</div></div><div style="font-weight:bold; color:#fff">¥${i.price * i.count}</div></div>`; });
-            html += `<div style="text-align:right; font-size:20px; font-weight:bold; color:#f85149; margin-top:20px;">总计: ¥${o.get('total')}</div>`;
-            document.getElementById('order-details-body').innerHTML = html; document.getElementById('order-modal').style.display = 'flex';
-        }
-        async function confirmOrder(id) { if(confirm("确认已收款？")) { const o=AV.Object.createWithoutData('Order',id); o.set('status','paid'); await o.save(); loadOrders(); } }
-
-        // =======================
-        // 2. 独立客服 (修复版)
-        // =======================
-        function startChatPoll() { if(chatTimer) clearInterval(chatTimer); chatTimer = setInterval(() => { if(currentChatUser) loadChatHistory(currentChatUser); loadContactList(); }, 3000); }
-        function stopChatPoll() { if(chatTimer) clearInterval(chatTimer); }
-
+        // === 聊天逻辑 (高级版) ===
         async function loadContactList() {
-            const q = new AV.Query('ChatMessage'); q.descending('createdAt'); q.limit(100); const msgs = await q.find();
-            const contacts = new Set();
-            msgs.forEach(m => { let u = m.get('channel') || m.get('senderName'); if(u && u!=='Admin') contacts.add(u); });
+            const list = document.getElementById('contact-list');
             
-            const listDiv = document.getElementById('contact-list');
-            if(contacts.size === 0) { listDiv.innerHTML = "<div style='padding:20px;color:#666;text-align:center'>暂无消息</div>"; return; }
+            // 1. 获取所有消息以分析频道
+            const q = new AV.Query('ChatMessage');
+            q.descending('createdAt'); q.limit(200);
+            const msgs = await q.find();
             
-            let html = "";
-            contacts.forEach(c => {
-                const active = c === currentChatUser ? 'active' : '';
-                html += `<div class="contact-item ${active}" onclick="selectUser('${c}')"><div class="contact-name">👤 ${c}</div><div class="contact-last" style="font-size:12px; color:#666">点击查看对话</div></div>`;
+            const channels = new Set();
+            channels.add('public'); // 默认必须有公共大厅
+
+            msgs.forEach(m => {
+                const c = m.get('channel');
+                if (c && c !== 'public') channels.add(c);
             });
-            listDiv.innerHTML = html;
+
+            let html = "";
+            channels.forEach(c => {
+                const isActive = c === currentChannel ? 'active' : '';
+                const isPub = c === 'public';
+                const name = isPub ? "📢 公共大厅" : `🔒 ${c.replace('order_', '订单 ')}`;
+                const cls = isPub ? 'contact-public' : 'contact-private';
+                
+                html += `<div class="contact-item ${cls} ${isActive}" onclick="selectChannel('${c}')">
+                    <div style="font-weight:bold; color:white">${name}</div>
+                    <div style="font-size:12px; color:#666">点击查看</div>
+                </div>`;
+            });
+            list.innerHTML = html;
         }
 
-        function selectUser(user) { currentChatUser = user; document.getElementById('chat-header').innerText = "正在对话: " + user; loadChatHistory(user); loadContactList(); }
+        function selectChannel(c) {
+            currentChannel = c;
+            document.getElementById('chat-header').innerText = c==='public' ? "📢 公共大厅 (所有人可见)" : "🔒 私密对话: " + c;
+            loadContactList(); // 刷新高亮
+            loadChatMsgs();
+        }
 
-        async function loadChatHistory(user) {
-            const q = new AV.Query('ChatMessage'); q.equalTo('channel', user); q.ascending('createdAt'); const msgs = await q.find();
-            const area = document.getElementById('msg-area'); area.innerHTML = "";
+        async function loadChatMsgs() {
+            if(!currentChannel) return;
+            const q = new AV.Query('ChatMessage');
+            
+            if (currentChannel === 'public') {
+                q.notEqualTo('isPrivate', true);
+            } else {
+                q.equalTo('channel', currentChannel);
+            }
+            
+            q.ascending('createdAt'); q.limit(50);
+            const msgs = await q.find();
+            
+            const div = document.getElementById('chat-msgs');
+            div.innerHTML = "";
+            
             msgs.forEach(m => {
-                const isAdmin = m.get('isAdmin'); const txt = m.get('content');
+                const isAdmin = m.get('isAdmin');
                 const delBtn = `<span class="del-msg" onclick="delMsg('${m.id}')">🗑️</span>`;
-                area.innerHTML += `<div class="msg-row ${isAdmin?'me':'other'}"><div class="bubble ${isAdmin?'bubble-admin':'bubble-user'}">${txt} ${delBtn}</div></div>`;
+                div.innerHTML += `<div class="chat-row" style="flex-direction:${isAdmin?'row-reverse':'row'}"><div class="chat-bubble ${isAdmin?'bubble-admin':'bubble-user'}"><b>${m.get('senderName')}:</b> ${m.get('content')} ${delBtn}</div></div>`;
             });
         }
 
         async function sendReply() {
-            if(!currentChatUser) return alert("请先选择联系人");
+            if(!currentChannel) return alert("请先选择左侧频道");
             const txt = document.getElementById('reply-txt').value; if(!txt) return;
-            const m = new (AV.Object.extend('ChatMessage'))();
-            m.set('content', txt); m.set('senderName', 'Admin'); m.set('isAdmin', true); m.set('channel', currentChatUser);
-            await m.save(); document.getElementById('reply-txt').value = ""; loadChatHistory(currentChatUser);
+            
+            const Msg = AV.Object.extend('ChatMessage');
+            const m = new Msg();
+            m.set('content', txt);
+            m.set('senderName', 'Admin');
+            m.set('isAdmin', true);
+            m.set('channel', currentChannel);
+            m.set('isPrivate', currentChannel !== 'public');
+            
+            await m.save();
+            document.getElementById('reply-txt').value = "";
+            loadChatMsgs();
         }
-        async function delMsg(id) { if(confirm("删除消息？")) { await AV.Object.createWithoutData('ChatMessage', id).destroy(); if(currentChatUser) loadChatHistory(currentChatUser); } }
-
-        // =======================
-        // 3. 公告系统 (修复版)
-        // =======================
-        async function postNotice() {
-            const txt = document.getElementById('notice-txt').value; if(!txt) return alert("内容为空");
-            try {
-                const notice = new (AV.Object.extend('Announcement'))();
-                notice.set('content', txt);
-                const acl = new AV.ACL(); acl.setPublicReadAccess(true); acl.setWriteAccess(AV.User.current(), true);
-                notice.setACL(acl); await notice.save();
-                alert("✅ 发布成功"); document.getElementById('notice-txt').value = ""; loadNotices();
-            } catch(e) { alert("发布失败: " + e.message); }
-        }
-        async function loadNotices() {
-            const q=new AV.Query('Announcement'); q.descending('createdAt'); const res=await q.find();
-            document.getElementById('notice-list').innerHTML = res.map(n=>`<div style="padding:10px; border-bottom:1px solid #30363d; display:flex; justify-content:space-between"><span>${n.get('content')}</span> <button class="btn-sm btn-red" onclick="delNotice('${n.id}')">删</button></div>`).join('');
-        }
-        async function delNotice(id) { await AV.Object.createWithoutData('Announcement',id).destroy(); loadNotices(); }
-
-        // =======================
-        // 4. 其他 (用户/商品/收款码)
-        // =======================
-        async function loadUsers() {
-            const q=new AV.Query('_User'); q.descending('createdAt'); const res=await q.find();
-            const bq=new AV.Query('Blacklist'); const bres=await bq.find(); const bans=bres.map(b=>b.get('email'));
-            document.getElementById('user-table').innerHTML = res.map(u=>{ const e=u.getEmail()||u.getUsername(); const isB=bans.includes(e); return `<tr><td>${e}</td><td>${u.id}</td><td>${u.createdAt.toLocaleString()}</td><td><button class="btn-sm ${isB?'btn-blue':'btn-red'}" onclick="toggleBan('${e}',${isB})">${isB?'解封':'封禁'}</button></td></tr>`}).join('');
-        }
-        async function toggleBan(e,isB){ if(isB){const q=new AV.Query('Blacklist');q.equalTo('email',e);(await q.find()).forEach(x=>x.destroy());}else{const b=new(AV.Object.extend('Blacklist'))();b.set('email',e);await b.save();} loadUsers(); }
-        async function liftBan(){ const v=document.getElementById('unblock-id').value; const q=new AV.Query('RegistrationLog'); q.equalTo('email',v); (await q.find()).forEach(x=>x.destroy()); alert("Done"); }
         
-        async function handleProduct(){ const n=document.getElementById('p-name').value, p=Number(document.getElementById('p-price').value), i=document.getElementById('p-img').value; if(!n) return; if(editingId) { const P=AV.Object.createWithoutData('Product',editingId); P.set('name',n); P.set('price',p); P.set('image',i); await P.save(); cancelEdit(); } else { const P=AV.Object.extend('Product'); const obj=new P(); obj.set('name',n); obj.set('price',p); obj.set('image',i); await obj.save(); } loadProducts(); }
-        async function loadProducts(){ const q=new AV.Query('Product'); q.descending('createdAt'); const r=await q.find(); document.getElementById('prod-list').innerHTML=r.map(p=>`<div style="padding:10px;border-bottom:1px solid #333">${p.get('name')} <button class="btn-sm btn-blue" onclick="startEdit('${p.id}','${p.get('name')}',${p.get('price')},'${p.get('image')}')">改</button> <button class="btn-sm btn-red" onclick="delP('${p.id}')">删</button></div>`).join(''); }
-        function startEdit(id,n,p,i){ editingId=id; document.getElementById('p-name').value=n; document.getElementById('p-price').value=p; document.getElementById('p-img').value=i; document.getElementById('submit-btn').innerText="保存"; document.getElementById('cancel-btn').style.display='inline'; }
-        function cancelEdit(){ editingId=null; document.getElementById('p-name').value=""; document.getElementById('p-price').value=""; document.getElementById('p-img').value=""; document.getElementById('submit-btn').innerText="发布"; document.getElementById('cancel-btn').style.display='none'; }
-        async function delP(id){ if(confirm("删?")){ await AV.Object.createWithoutData('Product',id).destroy(); loadProducts(); }}
-        async function saveQR(){ const u=document.getElementById('qr-url').value; const q=new AV.Query('GlobalConfig'); let c; try{c=await q.first()}catch(e){} if(!c){const C=AV.Object.extend('GlobalConfig');c=new C()} c.set('paymentQR',u); await c.save(); alert("Saved"); }
-        async function loadQR(){ const q=new AV.Query('GlobalConfig'); const c=await q.first(); if(c)document.getElementById('qr-url').value=c.get('paymentQR'); }
-    </script>
-</body>
-</html>
+        async function delMsg(id) { if(confirm("删除?")) { await AV.Object.createWithoutData('ChatMessage',id).destroy(); loadChatMsgs(); } }
+
+        // === 订单逻辑 ===
+        async function loadOrders() {
+            const d = document.getElementById('order-table'); d.innerHTML="Loading...";
+            const q = new AV.Query('Order'); q.descending('createdAt'); const res=await q.find(); d.innerHTML="";
+            res.forEach(o => {
+                const s = o.get('status');
+                const btn = s==='pending' ? `<button class="btn-sm btn-blue" onclick="confirmOrder('${o.id}')">收款</button>` : '✅';
+                // 显示订单详情的简化版
+                d.innerHTML += `<tr><td>${o.createdAt.toLocaleString()}</td><td>${o.get('email')}</td><td>¥${o.get('total')}</td><td>${s}</td><td><button class="btn-sm" onclick="alert('${o.id} 的详情')">详情</button></td><td>${btn}</td></tr>`;
+            });
+        }
+        async function confirmOrder(id) { if(confirm("收款?")){ const o=AV.Object.createWithoutData('Order',id); o.set('status','paid'); await o.save(); loadOrders(); } }
+
+        // === 其他模块 (复用) ===
+        async function loadProducts(){ const q=new AV.Query('Product');q.descending('createdAt');const r=await q.find(); document.getElementById('prod-list').innerHTML=r.map(p=>`<div>${p.get('name')} <button onclick="delP('${p.id}')">删</button></div>`).join(''); }
+        async function handleProduct(){ const n=document.getElementById('p-name').value, p=document.getElementById('p-price').value, i=document.getElementById('p-img').value; const P=AV.Object.extend('Product'); const obj=new P(); obj.set('name',n);obj.set('price',Number(p));obj.set('image',i); await obj.save(); loadProducts(); }
+        async function delP(id){ if(confirm("删?")){ await AV.Object.createWithoutData('Product',id).destroy(); loadProducts(); } }
+        async function loadUsers(){ const q=new AV.Query('_User'); const r=await q.find(); document.getElementById('user-table').innerHTML=r.map(u=>`<tr><td>${u.getEmail()}</td><td>${u.createdAt.toLocaleString()}</td><td>-</td></tr>`).join(''); }
+        async function postNotice(){ const t=document.getElementById('notice-txt').value; const N=AV.Object.extend('Announcement'); const n=new N(); n.set('content',t); const acl=new AV.ACL(); acl.setPublicReadAccess(true); acl.setWriteAccess(AV.User.current(),true); n.setACL(acl); await n.save(); loadNotices(); }
+        async function loadNotices(){ const q=new AV.Query('Announcement'); q.descending('createdAt'); const r=await q.find(); document.getElementById('notice-list').innerHTML=r.map(n=>`<div>${n.get('content')} <button onclick="delNotice('${n.id}')">删</button></div>`).join(''); }
+        async function delNotice(id){ await AV.Object.createWithoutData('Announcement',id

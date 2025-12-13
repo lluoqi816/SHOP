@@ -6,11 +6,10 @@
     <title>Icecube Store | 官方旗舰店</title>
     <script src="https://cdn.jsdelivr.net/npm/leancloud-storage@4.12.0/dist/av-min.js"></script>
     <style>
-        /* === 基础样式 === */
+        /* === 样式区 (保持不变) === */
         :root { --primary: #2563eb; --bg: #f3f4f6; --text: #1f2937; --red: #dc2626; }
         body { font-family: 'Segoe UI', sans-serif; background: var(--bg); margin: 0; color: var(--text); }
         
-        /* 导航栏 */
         header { background: white; padding: 15px 20px; position: sticky; top: 0; z-index: 100; box-shadow: 0 1px 3px rgba(0,0,0,0.1); display: flex; justify-content: space-between; align-items: center; }
         .logo { font-size: 1.5rem; font-weight: bold; color: var(--primary); }
         .nav-right { display: flex; align-items: center; gap: 10px; }
@@ -19,7 +18,6 @@
         .btn-red { background: var(--red); color: white; display: none; }
         .btn-cart { background: var(--primary); color: white; display: flex; align-items: center; gap: 5px; }
 
-        /* 商品列表 */
         .container { max-width: 1200px; margin: 20px auto; padding: 0 20px; }
         .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 20px; }
         .card { background: white; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 6px rgba(0,0,0,0.05); transition: 0.2s; }
@@ -30,7 +28,7 @@
         .price { color: var(--red); font-size: 1.2rem; font-weight: bold; }
         .btn-add { width: 100%; padding: 8px; background: #333; color: white; border: none; border-radius: 4px; cursor: pointer; margin-top: 10px; }
 
-        /* === 购物车侧边栏 === */
+        /* 购物车 & 支付 & 登录弹窗 (样式保持不变) */
         .cart-sidebar { position: fixed; top: 0; right: -400px; width: 350px; height: 100vh; background: white; box-shadow: -5px 0 15px rgba(0,0,0,0.1); transition: right 0.3s ease; z-index: 1000; display: flex; flex-direction: column; }
         .cart-sidebar.open { right: 0; }
         .cart-header { padding: 20px; border-bottom: 1px solid #eee; display: flex; justify-content: space-between; font-weight: bold; }
@@ -39,13 +37,9 @@
         .cart-item img { width: 50px; height: 50px; object-fit: cover; border-radius: 4px; }
         .cart-footer { padding: 20px; border-top: 1px solid #eee; background: #f9f9f9; }
         .btn-pay { width: 100%; padding: 12px; background: #059669; color: white; border: none; border-radius: 6px; font-size: 1rem; cursor: pointer; }
-
-        /* === 支付弹窗 === */
         .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 2000; display: none; justify-content: center; align-items: center; }
         .modal-box { background: white; padding: 30px; border-radius: 12px; width: 320px; text-align: center; }
         .qr-img { width: 200px; height: 200px; object-fit: contain; margin: 15px 0; border: 1px solid #eee; }
-        
-        /* === 登录弹窗与验证码 === */
         .auth-input { width: 100%; padding: 10px; margin: 8px 0; border: 1px solid #ddd; border-radius: 4px; box-sizing: border-box; }
         #captcha-area { display: none; }
         .captcha-row { display: flex; gap: 5px; align-items: center; margin: 8px 0; }
@@ -57,8 +51,9 @@
         .chat-box { position: absolute; bottom: 80px; right: 0; width: 320px; height: 450px; background: white; border-radius: 12px; box-shadow: 0 5px 20px rgba(0,0,0,0.2); display: none; flex-direction: column; }
         .chat-msgs { flex: 1; padding: 10px; overflow-y: auto; background: #f9f9f9; display: flex; flex-direction: column; gap: 8px; }
         .chat-input { padding: 10px; border-top: 1px solid #eee; display: flex; gap: 5px; }
-        .msg { padding: 6px 10px; border-radius: 6px; max-width: 80%; font-size: 13px; }
-        .msg-me { background: #dbeafe; align-self: flex-end; } .msg-other { background: #fff; align-self: flex-start; border: 1px solid #ddd; }
+        .msg { padding: 6px 10px; border-radius: 6px; max-width: 80%; font-size: 13px; word-wrap: break-word; }
+        .msg-me { background: #dbeafe; align-self: flex-end; color: #1e40af; }
+        .msg-other { background: #fff; align-self: flex-start; border: 1px solid #ddd; }
     </style>
 </head>
 <body>
@@ -80,7 +75,7 @@
         <div id="product-list" class="grid">加载中...</div>
     </div>
 
-    <!-- 购物车侧边栏 -->
+    <!-- 购物车 -->
     <div class="cart-sidebar" id="sidebar">
         <div class="cart-header"><span>我的购物车</span> <span onclick="toggleCart()" style="cursor:pointer">✕</span></div>
         <div class="cart-items" id="cart-list"></div>
@@ -100,10 +95,10 @@
         </div>
     </div>
 
-    <!-- 登录注册弹窗 -->
+    <!-- 登录/注册 -->
     <div class="modal-overlay" id="auth-modal">
         <div class="modal-box">
-            <h2 id="auth-title">登录</h2>
+            <h2 id="auth-title">账号登录</h2>
             <input id="u-email" class="auth-input" placeholder="邮箱">
             <input id="u-pass" type="password" class="auth-input" placeholder="密码">
             <div id="captcha-area">
@@ -121,9 +116,15 @@
     <!-- 聊天挂件 -->
     <div class="chat-widget">
         <div class="chat-box" id="chat-win">
-            <div style="background:var(--primary); color:white; padding:10px; display:flex; justify-content:space-between;"><span>客服</span><span onclick="toggleChat()" style="cursor:pointer">✕</span></div>
-            <div class="chat-msgs" id="chat-hist"></div>
-            <div class="chat-input"><input id="chat-txt" style="flex:1" placeholder="..."><button onclick="sendMsg()">发</button></div>
+            <div style="background:var(--primary); color:white; padding:10px; font-weight:bold; display:flex; justify-content:space-between;">
+                <span>💬 私信客服</span>
+                <span style="cursor:pointer" onclick="toggleChat()">✕</span>
+            </div>
+            <div class="chat-msgs" id="chat-history"></div>
+            <div class="chat-input">
+                <input id="chat-txt" style="flex:1; padding:5px;" placeholder="发送私信...">
+                <button onclick="sendMsg()" style="background:var(--primary); color:white; border:none; padding:0 10px;">发送</button>
+            </div>
         </div>
         <div class="chat-icon" onclick="toggleChat()">💬</div>
     </div>
@@ -135,19 +136,17 @@
         let cart = JSON.parse(localStorage.getItem('myCart') || '[]');
         let isReg = false; let realC = "";
 
-        // === 初始化 ===
         checkUser();
         loadProducts();
         updateCartUI();
-        setInterval(loadChat, 3000);
+        setInterval(loadChat, 3000); // 轮询聊天
 
-        // === 1. 购物车逻辑 (修复部分) ===
+        // === 购物车 ===
         function addToCart(item) {
-            if(!AV.User.current()) return openAuth(); // 未登录不能加购
+            if(!AV.User.current()) return openAuth();
             const ex = cart.find(x => x.id === item.id);
             if(ex) ex.count++; else cart.push({...item, count: 1});
-            saveCart();
-            toggleCart(true);
+            saveCart(); toggleCart(true);
         }
         function saveCart() { localStorage.setItem('myCart', JSON.stringify(cart)); updateCartUI(); }
         function toggleCart(force) { 
@@ -160,33 +159,22 @@
             let total = 0;
             cart.forEach((it, idx) => {
                 total += it.price * it.count;
-                list.innerHTML += `
-                    <div class="cart-item">
-                        <img src="${it.image}">
-                        <div style="flex:1">
-                            <div>${it.name}</div>
-                            <div style="color:red">¥ ${it.price}</div>
-                        </div>
-                        <button onclick="changeQty(${idx}, -1)">-</button> ${it.count} <button onclick="changeQty(${idx}, 1)">+</button>
-                    </div>`;
+                list.innerHTML += `<div class="cart-item"><img src="${it.image}"><div style="flex:1"><div>${it.name}</div><div style="color:red">¥ ${it.price}</div></div><button onclick="changeQty(${idx}, -1)">-</button> ${it.count} <button onclick="changeQty(${idx}, 1)">+</button></div>`;
             });
             document.getElementById('total-price').innerText = total;
         }
         function changeQty(i, d) { cart[i].count+=d; if(cart[i].count<=0) cart.splice(i,1); saveCart(); }
         
-        // === 2. 支付逻辑 ===
         async function showPay() {
             const total = document.getElementById('total-price').innerText;
             if(total == 0) return alert("空购物车");
             document.getElementById('pay-modal').style.display = 'flex';
             document.getElementById('pay-amount').innerText = total;
-            // 获取后台配置的收款码
-            const q = new AV.Query('GlobalConfig');
-            const c = await q.first();
+            const q = new AV.Query('GlobalConfig'); const c = await q.first();
             document.getElementById('qr-img').src = c ? c.get('paymentQR') : "";
         }
 
-        // === 3. 用户与注册 ===
+        // === 用户 ===
         function checkUser() {
             const u = AV.User.current();
             if(u) {
@@ -218,37 +206,26 @@
             try {
                 if(isReg) {
                     if(document.getElementById('c-input').value.toUpperCase()!==realC) return alert("验证码错");
-                    // 简化的注册逻辑
+                    // 云端风控
+                    const fp = localStorage.getItem('did') || Math.random().toString(36); localStorage.setItem('did', fp);
+                    const lq = new AV.Query('RegistrationLog'); lq.equalTo('fingerprint', fp); lq.descending('createdAt');
+                    const log = await lq.first();
+                    if(log && (Date.now()-log.createdAt.getTime()<600000)) throw new Error("注册太频繁，请稍后再试");
+
                     const u = new AV.User(); u.setUsername(e); u.setPassword(p); u.setEmail(e);
-                    await u.signUp(); alert("注册成功，请去邮箱激活"); toggleAuthMode();
+                    await u.signUp();
+                    const Log = AV.Object.extend('RegistrationLog'); const l = new Log(); l.set('email', e); l.set('fingerprint', fp); await l.save();
+                    alert("注册成功，请去邮箱激活"); toggleAuthMode();
                 } else {
                     await AV.User.logIn(e, p);
-                    // 检查封禁
                     const q = new AV.Query('Blacklist'); q.equalTo('email', e);
                     if(await q.count()>0) { alert("已封禁"); AV.User.logOut(); return; }
                     location.reload();
                 }
-            } catch(err) { alert(err.message); }
+            } catch(err) { alert(err.message); if(isReg) drawC(); }
         }
 
-        // === 4. 商品与聊天 ===
-        async function loadProducts() {
-            const q = new AV.Query('Product'); q.descending('createdAt');
-            const res = await q.find();
-            const div = document.getElementById('product-list'); div.innerHTML="";
-            res.forEach(p => {
-                const item = { id:p.id, name:p.get('name'), price:p.get('price'), image:p.get('image') };
-                div.innerHTML += `
-                    <div class="card">
-                        <img src="${item.image}">
-                        <div class="info">
-                            <div class="title">${item.name}</div>
-                            <div class="price">¥${item.price}</div>
-                            <button class="btn-add" onclick='addToCart(${JSON.stringify(item)})'>+ 购物车</button>
-                        </div>
-                    </div>`;
-            });
-        }
+        // === 聊天 (私信模式) ===
         function toggleChat() { 
             const w = document.getElementById('chat-win'); 
             w.style.display = w.style.display==='flex'?'none':'flex';
@@ -256,20 +233,39 @@
         }
         async function sendMsg() {
             if(!AV.User.current()) return alert("请先登录");
+            const q = new AV.Query('Blacklist'); q.equalTo('email', AV.User.current().getUsername());
+            if(await q.count()>0) { alert("已封禁"); AV.User.logOut(); return; }
+
             const t = document.getElementById('chat-txt').value; if(!t) return;
             const C = AV.Object.extend('ChatMessage'); const m = new C();
-            m.set('content', t); m.set('senderName', AV.User.current().getUsername()); m.set('isAdmin', false);
+            m.set('content', t); 
+            m.set('senderName', AV.User.current().getUsername()); 
+            m.set('channel', AV.User.current().getUsername()); // 关键：频道设为自己的用户名
+            m.set('isAdmin', false);
             await m.save(); document.getElementById('chat-txt').value=''; loadChat();
         }
         async function loadChat() {
-            if(document.getElementById('chat-win').style.display==='none') return;
-            const q = new AV.Query('ChatMessage'); q.ascending('createdAt'); q.limit(20);
+            if(document.getElementById('chat-win').style.display==='none' || !AV.User.current()) return;
+            const myName = AV.User.current().getUsername();
+            const q = new AV.Query('ChatMessage'); 
+            q.equalTo('channel', myName); // 只看自己的频道
+            q.ascending('createdAt'); q.limit(20);
             const ms = await q.find();
-            const d = document.getElementById('chat-hist'); d.innerHTML="";
-            const me = AV.User.current()?.getUsername();
+            const d = document.getElementById('chat-history'); d.innerHTML="";
             ms.forEach(m => {
-                const isMe = m.get('senderName')===me;
-                d.innerHTML+=`<div class="msg ${isMe?'msg-me':'msg-other'}"><b>${m.get('isAdmin')?'客服':m.get('senderName')}:</b> ${m.get('content')}</div>`;
+                const isAdmin = m.get('isAdmin');
+                d.innerHTML+=`<div class="msg ${isAdmin?'msg-other':'msg-me'}"><b>${isAdmin?'客服':m.get('senderName')}:</b> ${m.get('content')}</div>`;
+            });
+        }
+
+        // === 加载商品 ===
+        async function loadProducts() {
+            const q = new AV.Query('Product'); q.descending('createdAt');
+            const res = await q.find();
+            const div = document.getElementById('product-list'); div.innerHTML="";
+            res.forEach(p => {
+                const item = { id:p.id, name:p.get('name'), price:p.get('price'), image:p.get('image') };
+                div.innerHTML += `<div class="card"><img src="${item.image}"><div class="info"><div class="title">${item.name}</div><div class="price">¥${item.price}</div><button class="btn-add" onclick='addToCart(${JSON.stringify(item)})'>+ 购物车</button></div></div>`;
             });
         }
     </script>

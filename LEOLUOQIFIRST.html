@@ -5,42 +5,34 @@
     <title>Icecube Master Control</title>
     <script src="https://cdn.jsdelivr.net/npm/leancloud-storage@4.12.0/dist/av-min.js"></script>
     <style>
-        /* 保持之前的黑客风格，增加Tab切换 */
+        /* UI */
         body { font-family: 'Segoe UI', monospace; background: #0d1117; color: #c9d1d9; display: flex; height: 100vh; margin: 0; overflow: hidden;}
-        
-        /* 侧边栏 */
         .sidebar { width: 200px; background: #161b22; border-right: 1px solid #30363d; padding: 20px; display: flex; flex-direction: column; gap: 10px; }
         .sidebar h2 { color: #58a6ff; margin: 0 0 20px 0; font-size: 1.2rem; text-align: center; }
         .nav-btn { padding: 12px; background: transparent; color: #8b949e; border: none; text-align: left; cursor: pointer; border-radius: 6px; font-weight: bold; }
         .nav-btn:hover, .nav-btn.active { background: #21262d; color: #fff; }
         .nav-btn.logout { margin-top: auto; color: #f85149; }
-
-        /* 主内容区 */
         .main { flex: 1; padding: 20px; overflow-y: auto; display: none; }
         .main.active { display: block; }
-
-        /* 表格样式 */
         table { width: 100%; border-collapse: collapse; margin-top: 20px; }
         th, td { border: 1px solid #30363d; padding: 10px; text-align: left; }
         th { background: #21262d; color: #fff; }
-        .btn-sm { padding: 5px 10px; border-radius: 4px; border: none; cursor: pointer; color: white; }
-        .btn-edit { background: #1f6feb; }
-        .btn-del { background: #da3633; }
+        .btn-sm { padding: 5px 10px; border-radius: 4px; border: none; cursor: pointer; color: white; margin-right: 5px;}
+        .btn-edit { background: #1f6feb; } .btn-del { background: #da3633; }
+        
+        /* 登录层 */
+        #login-overlay { position: fixed; top:0; left:0; width:100%; height:100%; background:#0d1117; z-index:999; display:flex; justify-content:center; align-items:center; }
+        .login-box { background:#161b22; padding:40px; border:1px solid #30363d; width:300px; border-radius:10px; }
+        input,textarea { width:100%; padding:10px; margin:5px 0 15px 0; background:#0d1117; border:1px solid #30363d; color:white; box-sizing:border-box; }
+        button { width:100%; padding:10px; background:#238636; color:white; border:none; border-radius:6px; cursor:pointer; }
 
         /* 聊天管理 */
-        .chat-admin-box { background: #161b22; border: 1px solid #30363d; height: 80vh; display: flex; flex-direction: column; border-radius: 10px; }
+        .chat-admin-box { background: #161b22; border: 1px solid #30363d; height: 60vh; display: flex; flex-direction: column; border-radius: 10px; }
         .chat-list { flex: 1; overflow-y: auto; padding: 20px; display: flex; flex-direction: column; gap: 10px; }
         .chat-row { display: flex; gap: 10px; }
         .chat-bubble { padding: 10px; border-radius: 8px; max-width: 60%; font-size: 0.9rem; }
         .bubble-user { background: #21262d; border: 1px solid #30363d; }
         .bubble-admin { background: #1f6feb; color: white; align-self: flex-end; margin-left: auto; }
-        .chat-input { padding: 10px; background: #0d1117; border-top: 1px solid #30363d; display: flex; gap: 10px; }
-        
-        /* 登录框 (复用之前的) */
-        #login-overlay { position: fixed; top:0; left:0; width:100%; height:100%; background:#0d1117; z-index:999; display:flex; justify-content:center; align-items:center; }
-        .login-box { background:#161b22; padding:40px; border:1px solid #30363d; width:300px; border-radius:10px; }
-        input { width:100%; padding:10px; margin:5px 0 15px 0; background:#0d1117; border:1px solid #30363d; color:white; box-sizing:border-box; }
-        button { width:100%; padding:10px; background:#238636; color:white; border:none; border-radius:6px; cursor:pointer; }
     </style>
 </head>
 <body>
@@ -71,22 +63,29 @@
         <div style="background:#161b22; padding:20px; border-radius:8px;">
             <input type="text" id="p-name" placeholder="商品名称">
             <input type="number" id="p-price" placeholder="价格">
-            <input type="text" id="p-img" placeholder="图片链接">
-            <button onclick="uploadProduct()">发布商品</button>
+            <textarea id="p-img" rows="2" placeholder="图片链接 (多图用逗号隔开)"></textarea>
+            <button onclick="uploadProduct()">🚀 发布商品</button>
         </div>
-        <!-- 列表省略，逻辑同上一个版本，可自行添加列表显示 -->
+        <div style="margin-top:20px">
+            <h4>商品列表</h4>
+            <div id="manager-list">点击刷新加载...</div>
+        </div>
     </div>
 
     <!-- 2. 用户管理 -->
     <div id="tab-users" class="main">
         <h3>👥 注册用户列表</h3>
-        <button onclick="loadUsers()" style="width:auto; padding:5px 15px; margin-bottom:10px;">🔄 刷新列表</button>
-        <p style="font-size:12px; color:#8b949e">注意：出于安全加密，无法查看用户原始密码，但管理员可以重置密码。</p>
-        
+        <button onclick="loadUsers()" style="width:auto; padding:5px 15px;">🔄 刷新列表</button>
         <table>
             <thead><tr><th>ID</th><th>用户名 / 邮箱</th><th>注册时间</th><th>操作</th></tr></thead>
             <tbody id="user-table-body"></tbody>
         </table>
+        
+        <h3 style="margin-top:40px; border-top:1px solid #333; padding-top:20px;">🔓 风控解除中心</h3>
+        <div style="display:flex; gap:10px;">
+            <input type="text" id="unblock-email" placeholder="输入被限制注册的邮箱" style="width:300px;">
+            <button onclick="liftRegistrationBan()" style="width:auto; background:#1f6feb">解除限制</button>
+        </div>
     </div>
 
     <!-- 3. 客服中心 -->
@@ -94,142 +93,112 @@
         <h3>💬 实时客服中心</h3>
         <div class="chat-admin-box">
             <div class="chat-list" id="chat-admin-list"></div>
-            <div class="chat-input">
-                <input type="text" id="reply-txt" placeholder="回复消息...">
+            <div style="padding:10px; background:#0d1117; display:flex; gap:10px;">
+                <input type="text" id="reply-txt" placeholder="回复消息..." style="margin:0;">
                 <button onclick="sendReply()" style="width:100px;">发送</button>
             </div>
         </div>
     </div>
 
     <script>
-        const CONFIG = { appId: "SKHyBQH4nGeF6PDB8MVLTMD4-MdYXbMMI", appKey: "kUQ2O1stpz6V8bNhcbk2tkrV", serverURL: "https://skhybqh4.api.lncldglobal.com", mySecretKey: "Icecube2024" }; // 简化的RSA Key用于演示，请自行替换
+        const CONFIG = { 
+            appId: "SKHyBQH4nGeF6PDB8MVLTMD4-MdYXbMMI", 
+            appKey: "kUQ2O1stpz6V8bNhcbk2tkrV", 
+            serverURL: "https://skhybqh4.api.lncldglobal.com", 
+            mySecretKey: "Icecube2024" // 自定义备用密钥，如果不需要可忽略
+        };
         AV.init(CONFIG);
 
-        // 登录逻辑 (包含RSA校验)
+        // === 登录 (RSA) ===
         async function doLogin() {
             const email = document.getElementById('l-email').value;
             const pass = document.getElementById('l-pass').value;
             const token = document.getElementById('l-token').value;
-
-            // 这里省略了去云端查Token的步骤以节省代码长度，实际请加上之前的RSA逻辑
-            // 简单验证演示：
-            if(token.length !== 100) return alert("Token Error"); 
             
+            // 简单校验Token长度
+            if(token.length !== 100) return alert("❌ Token 长度错误 (必须100位)");
+
             try {
+                // 1. 验证 Token (云端)
+                const q = new AV.Query('SecureToken');
+                const realTokenObj = await q.first();
+                if(!realTokenObj || realTokenObj.get('content') !== token) {
+                    return alert("❌ 令牌无效 (RSA Token Invalid)");
+                }
+
+                // 2. 登录
                 await AV.User.logIn(email, pass);
                 document.getElementById('login-overlay').style.display = 'none';
-                startChatPoll(); // 登录后开始轮询消息
-            } catch(e) { alert("Login Failed"); }
+                startChatPoll();
+                loadMyProducts();
+            } catch(e) { alert("登录失败: " + e.message); }
         }
 
-        // 切换标签
         function switchTab(tab) {
             document.querySelectorAll('.main').forEach(d => d.classList.remove('active'));
             document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
             document.getElementById('tab-'+tab).classList.add('active');
-            
             if(tab === 'users') loadUsers();
             if(tab === 'chat') { loadAdminChat(); scrollChat(); }
+            if(tab === 'products') loadMyProducts();
         }
 
-        // === 用户管理逻辑 ===
+        // === 用户管理 (封禁/解封) ===
         async function loadUsers() {
+            const tbody = document.getElementById('user-table-body');
+            tbody.innerHTML = '<tr><td colspan="4" style="text-align:center">加载中...</td></tr>';
             try {
-                const query = new AV.Query('_User');
-                query.descending('createdAt');
-                const users = await query.find();
+                const userQuery = new AV.Query('_User'); userQuery.descending('createdAt');
+                const users = await userQuery.find();
                 
-                const tbody = document.getElementById('user-table-body');
+                const banQuery = new AV.Query('Blacklist');
+                const bannedList = await banQuery.find();
+                const bannedEmails = bannedList.map(i => i.get('email'));
+
                 tbody.innerHTML = "";
-                
                 users.forEach(u => {
+                    const email = u.getEmail() || u.getUsername();
+                    const isBanned = bannedEmails.includes(email);
                     const tr = document.createElement('tr');
-                    tr.innerHTML = `
-                        <td>${u.id.substring(0,6)}...</td>
-                        <td>${u.getUsername()}</td>
-                        <td>${u.createdAt.toLocaleString()}</td>
-                        <td>
-                            <button class="btn-sm btn-edit" onclick="resetPass('${u.id}')">重置密码</button>
-                        </td>
-                    `;
+                    if(isBanned) tr.style.backgroundColor = "#3d1818";
+                    tr.innerHTML = `<td>${u.id.substring(0,6)}</td><td>${email} ${isBanned?'🚫':''}</td><td>${u.createdAt.toLocaleString()}</td><td>${isBanned ? `<button class="btn-sm btn-edit" style="background:green" onclick="unbanUser('${email}')">解封</button>` : `<button class="btn-sm btn-del" onclick="banUser('${email}')">封禁</button>`}</td>`;
                     tbody.appendChild(tr);
                 });
-            } catch(e) {
-                alert("加载用户失败 (请检查LeanCloud _User表权限是否开启find all users)");
-            }
+            } catch(e) { alert("加载失败: "+e.message); }
         }
 
-        async function resetPass(userId) {
-            const newPass = prompt("请输入该用户的新密码:");
-            if(!newPass) return;
-            
-            // 注意：通常JS端不能直接改别人密码，除非用MasterKey(不安全)或者云引擎。
-            // 这里我们用一个变通方法：告诉管理员去控制台改，或者如果是你自己测试号，你可以登那个号改。
-            // 真正的修改别人密码需要 Cloud Code。这里仅作演示提示。
-            alert("⚠️ 安全提示：为了安全，前端JS无法直接修改他人密码。\n请前往 LeanCloud 控制台 -> _User -> 找到该用户手动修改。");
+        async function banUser(email) {
+            if(!confirm("封禁该用户？")) return;
+            const Blacklist = AV.Object.extend('Blacklist');
+            const ban = new Blacklist(); ban.set('email', email); await ban.save();
+            alert("已封禁"); loadUsers();
         }
 
-        // === 聊天管理逻辑 ===
-        let lastChatTime = null;
-        
-        function startChatPoll() {
-            setInterval(loadAdminChat, 3000); // 3秒刷新
+        async function unbanUser(email) {
+            const q = new AV.Query('Blacklist'); q.equalTo('email', email);
+            const res = await q.find();
+            await Promise.all(res.map(i => i.destroy()));
+            alert("已解封"); loadUsers();
         }
 
+        async function liftRegistrationBan() {
+            const email = document.getElementById('unblock-email').value.trim();
+            if(!email) return;
+            const q = new AV.Query('RegistrationLog'); q.equalTo('email', email);
+            const res = await q.find();
+            await Promise.all(res.map(i => i.destroy()));
+            alert("已解除限制");
+        }
+
+        // === 聊天 ===
+        function startChatPoll() { setInterval(loadAdminChat, 3000); }
         async function loadAdminChat() {
-            const query = new AV.Query('ChatMessage');
-            query.ascending('createdAt');
-            query.limit(50);
-            const msgs = await query.find();
-
-            const div = document.getElementById('chat-admin-list');
-            div.innerHTML = "";
-
+            const q = new AV.Query('ChatMessage'); q.ascending('createdAt'); q.limit(50);
+            const msgs = await q.find();
+            const div = document.getElementById('chat-admin-list'); div.innerHTML = "";
             msgs.forEach(m => {
-                const isAdmin = m.get('isAdmin');
-                const sender = m.get('senderName');
-                const txt = m.get('content') || "[图片]";
-                
-                const row = document.createElement('div');
-                row.className = 'chat-row';
-                
-                if (isAdmin) {
-                    row.innerHTML = `<div class="chat-bubble bubble-admin">${txt}</div>`;
-                } else {
-                    row.innerHTML = `<div class="chat-bubble bubble-user"><b>${sender}:</b> ${txt}</div>`;
-                }
-                div.appendChild(row);
+                const isAdmin = m.get('isAdmin'); const txt = m.get('content');
+                div.innerHTML += `<div class="chat-row"><div class="chat-bubble ${isAdmin?'bubble-admin':'bubble-user'}"><b>${isAdmin?'Me':m.get('senderName')}:</b> ${txt}</div></div>`;
             });
         }
-
-        async function sendReply() {
-            const txt = document.getElementById('reply-txt').value;
-            if(!txt) return;
-
-            const Chat = AV.Object.extend('ChatMessage');
-            const msg = new Chat();
-            msg.set('content', txt);
-            msg.set('senderName', 'Admin'); // 管理员名字
-            msg.set('isAdmin', true); // 标记为管理员消息
-            
-            await msg.save();
-            document.getElementById('reply-txt').value = "";
-            loadAdminChat();
-            scrollChat();
-        }
-
-        function scrollChat() {
-            setTimeout(() => {
-                const d = document.getElementById('chat-admin-list');
-                d.scrollTop = d.scrollHeight;
-            }, 200);
-        }
-
-        // 商品发布 (简写)
-        function uploadProduct() {
-            /* 复制之前的发布逻辑即可 */
-            alert("请将之前的 uploadProduct 代码复制到这里");
-        }
-    </script>
-</body>
-</html>
+        async function 

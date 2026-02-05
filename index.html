@@ -3,278 +3,800 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Icecube Store | 官方旗舰店</title>
-    <script src="https://cdn.jsdelivr.net/npm/leancloud-storage@4.12.0/dist/av-min.js"></script>
+    <title>顺滑登录界面</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
-        /* === 样式区 === */
-        :root { --primary: #2563eb; --bg: #f3f4f6; --text: #1f2937; --red: #dc2626; --green: #059669; }
-        body { font-family: 'Segoe UI', sans-serif; background: var(--bg); margin: 0; color: var(--text); }
-        
-        header { background: white; padding: 15px 20px; position: sticky; top: 0; z-index: 100; box-shadow: 0 1px 3px rgba(0,0,0,0.1); display: flex; justify-content: space-between; align-items: center; }
-        .logo { font-size: 1.5rem; font-weight: bold; color: var(--primary); }
-        .nav-right { display: flex; align-items: center; gap: 10px; }
-        .btn { padding: 8px 15px; border-radius: 20px; cursor: pointer; border: none; font-size: 0.9rem; transition: 0.2s; }
-        .btn-black { background: #111; color: white; }
-        .btn-red { background: var(--red); color: white; display: none; }
-        .btn-cart { background: var(--primary); color: white; display: flex; align-items: center; gap: 5px; }
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
 
-        .container { max-width: 1200px; margin: 20px auto; padding: 0 20px; }
-        .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 20px; }
-        .card { background: white; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 6px rgba(0,0,0,0.05); }
-        .card img { width: 100%; height: 200px; object-fit: cover; }
-        .info { padding: 15px; }
-        .title { font-weight: bold; margin-bottom: 5px; height: 24px; overflow: hidden; }
-        .price { color: var(--red); font-size: 1.2rem; font-weight: bold; }
-        .btn-add { width: 100%; padding: 8px; background: #333; color: white; border: none; border-radius: 4px; cursor: pointer; margin-top: 10px; }
+        body {
+            font-family: 'Poppins', sans-serif;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            overflow: hidden;
+        }
 
-        /* 侧边栏 & 弹窗 */
-        .sidebar-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 999; display: none; }
-        .sidebar { position: fixed; top: 0; right: -450px; width: 400px; height: 100vh; background: white; z-index: 1000; transition: 0.3s; display: flex; flex-direction: column; box-shadow: -5px 0 15px rgba(0,0,0,0.1); }
-        .sidebar.open { right: 0; }
-        .sb-header { padding: 20px; border-bottom: 1px solid #eee; font-weight: bold; display: flex; justify-content: space-between; }
-        .sb-content { flex: 1; overflow-y: auto; padding: 15px; background: #f9f9f9; }
-        
-        .order-card { background: white; padding: 15px; border-radius: 8px; margin-bottom: 15px; border: 1px solid #eee; }
-        .order-head { display: flex; justify-content: space-between; font-size: 12px; color: #666; margin-bottom: 10px; border-bottom: 1px dashed #eee; padding-bottom: 5px; }
-        .contact-btn { background: white; border: 1px solid var(--primary); color: var(--primary); padding: 5px 10px; border-radius: 4px; font-size: 12px; cursor: pointer; margin-top: 10px; width: 100%; }
-        
-        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 2000; display: none; justify-content: center; align-items: center; }
-        .modal-box { background: white; padding: 30px; border-radius: 12px; width: 320px; text-align: center; }
-        .auth-input { width: 100%; padding: 10px; margin: 8px 0; border: 1px solid #ddd; border-radius: 4px; box-sizing: border-box; }
-        #captcha-area { display: none; } .captcha-row { display: flex; gap: 5px; align-items: center; margin: 8px 0; } #captcha-canvas { border: 1px solid #ddd; cursor: pointer; }
+        /* 动态背景气泡 */
+        .background {
+            position: fixed;
+            width: 100%;
+            height: 100%;
+            top: 0;
+            left: 0;
+            overflow: hidden;
+            z-index: 0;
+        }
 
-        /* === 聊天挂件 === */
-        .chat-widget { position: fixed; bottom: 20px; right: 20px; z-index: 900; }
-        .chat-icon { width: 60px; height: 60px; background: var(--primary); border-radius: 50%; color: white; display: flex; justify-content: center; align-items: center; font-size: 30px; cursor: pointer; box-shadow: 0 5px 15px rgba(37, 99, 235, 0.4); }
-        .chat-box { position: absolute; bottom: 80px; right: 0; width: 320px; height: 450px; background: white; border-radius: 12px; box-shadow: 0 5px 20px rgba(0,0,0,0.2); display: none; flex-direction: column; overflow: hidden; }
-        
-        .chat-header { background: var(--primary); color: white; padding: 10px; font-weight: bold; display: flex; justify-content: space-between; align-items: center; }
-        .chat-header.private { background: #7c3aed; } /* 私聊变紫色 */
-        
-        .chat-msgs { flex: 1; padding: 10px; overflow-y: auto; background: #f9f9f9; display: flex; flex-direction: column; gap: 8px; }
-        .chat-input { padding: 10px; border-top: 1px solid #eee; display: flex; gap: 5px; }
-        .msg { padding: 6px 10px; border-radius: 6px; max-width: 80%; font-size: 13px; word-wrap: break-word; }
-        .msg-me { background: #dbeafe; align-self: flex-end; color: #1e40af; }
-        .msg-other { background: #fff; border: 1px solid #ddd; align-self: flex-start; }
-        
-        .notice-bar { background: #fff3cd; padding: 8px; font-size: 12px; text-align: center; color: #856404; display: none; }
-        .back-public { font-size: 12px; text-decoration: underline; cursor: pointer; color: white; margin-right: 10px;}
+        .bubble {
+            position: absolute;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.1);
+            animation: float 15s infinite ease-in-out;
+        }
+
+        .bubble:nth-child(1) {
+            width: 80px;
+            height: 80px;
+            left: 10%;
+            animation-delay: 0s;
+        }
+
+        .bubble:nth-child(2) {
+            width: 150px;
+            height: 150px;
+            left: 30%;
+            animation-delay: 2s;
+        }
+
+        .bubble:nth-child(3) {
+            width: 60px;
+            height: 60px;
+            left: 50%;
+            animation-delay: 4s;
+        }
+
+        .bubble:nth-child(4) {
+            width: 120px;
+            height: 120px;
+            left: 70%;
+            animation-delay: 6s;
+        }
+
+        .bubble:nth-child(5) {
+            width: 90px;
+            height: 90px;
+            left: 85%;
+            animation-delay: 8s;
+        }
+
+        @keyframes float {
+            0%, 100% {
+                transform: translateY(100vh) rotate(0deg);
+                opacity: 0;
+            }
+            10% {
+                opacity: 1;
+            }
+            90% {
+                opacity: 1;
+            }
+            100% {
+                transform: translateY(-100vh) rotate(720deg);
+                opacity: 0;
+            }
+        }
+
+        /* 登录容器 */
+        .login-container {
+            position: relative;
+            z-index: 1;
+            width: 420px;
+            padding: 50px 40px;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(20px);
+            border-radius: 24px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.15);
+            transform: translateY(20px);
+            opacity: 0;
+            animation: slideUp 0.8s ease forwards;
+        }
+
+        @keyframes slideUp {
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        /* Logo动画 */
+        .logo {
+            width: 80px;
+            height: 80px;
+            margin: 0 auto 30px;
+            background: linear-gradient(135deg, #fff 0%, #f0f0f0 100%);
+            border-radius: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            animation: logoFloat 3s ease-in-out infinite;
+        }
+
+        .logo svg {
+            width: 45px;
+            height: 45px;
+            fill: url(#logoGradient);
+        }
+
+        @keyframes logoFloat {
+            0%, 100% {
+                transform: translateY(0);
+            }
+            50% {
+                transform: translateY(-10px);
+            }
+        }
+
+        h1 {
+            color: #fff;
+            text-align: center;
+            font-size: 28px;
+            font-weight: 600;
+            margin-bottom: 10px;
+            letter-spacing: 1px;
+        }
+
+        .subtitle {
+            color: rgba(255, 255, 255, 0.7);
+            text-align: center;
+            font-size: 14px;
+            margin-bottom: 40px;
+        }
+
+        /* 表单组 */
+        .form-group {
+            position: relative;
+            margin-bottom: 25px;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 18px 20px;
+            padding-left: 55px;
+            background: rgba(255, 255, 255, 0.1);
+            border: 2px solid rgba(255, 255, 255, 0.1);
+            border-radius: 14px;
+            color: #fff;
+            font-size: 16px;
+            font-family: inherit;
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            outline: none;
+        }
+
+        .form-group input::placeholder {
+            color: rgba(255, 255, 255, 0.5);
+            transition: all 0.3s ease;
+        }
+
+        .form-group input:focus {
+            background: rgba(255, 255, 255, 0.15);
+            border-color: rgba(255, 255, 255, 0.5);
+            box-shadow: 0 0 0 4px rgba(255, 255, 255, 0.1);
+            transform: translateY(-2px);
+        }
+
+        .form-group input:focus::placeholder {
+            opacity: 0;
+            transform: translateX(10px);
+        }
+
+        .form-group .icon {
+            position: absolute;
+            left: 20px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 20px;
+            height: 20px;
+            fill: rgba(255, 255, 255, 0.5);
+            transition: all 0.3s ease;
+        }
+
+        .form-group input:focus + .icon {
+            fill: #fff;
+            transform: translateY(-50%) scale(1.1);
+        }
+
+        /* 浮动标签 */
+        .form-group label {
+            position: absolute;
+            left: 55px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: rgba(255, 255, 255, 0.5);
+            font-size: 16px;
+            pointer-events: none;
+            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        .form-group input:focus + .icon + label,
+        .form-group input:not(:placeholder-shown) + .icon + label {
+            top: -10px;
+            left: 20px;
+            font-size: 12px;
+            color: #fff;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            padding: 2px 10px;
+            border-radius: 6px;
+        }
+
+        /* 记住我 & 忘记密码 */
+        .form-options {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+        }
+
+        .remember-me {
+            display: flex;
+            align-items: center;
+            cursor: pointer;
+        }
+
+        .remember-me input {
+            display: none;
+        }
+
+        .checkmark {
+            width: 22px;
+            height: 22px;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-radius: 6px;
+            margin-right: 10px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            transition: all 0.3s ease;
+        }
+
+        .checkmark svg {
+            width: 14px;
+            height: 14px;
+            fill: #fff;
+            opacity: 0;
+            transform: scale(0);
+            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        .remember-me input:checked + .checkmark {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            border-color: transparent;
+        }
+
+        .remember-me input:checked + .checkmark svg {
+            opacity: 1;
+            transform: scale(1);
+        }
+
+        .remember-me span {
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 14px;
+        }
+
+        .forgot-password {
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 14px;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .forgot-password::after {
+            content: '';
+            position: absolute;
+            bottom: -2px;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background: #fff;
+            transition: width 0.3s ease;
+        }
+
+        .forgot-password:hover {
+            color: #fff;
+        }
+
+        .forgot-password:hover::after {
+            width: 100%;
+        }
+
+        /* 登录按钮 */
+        .login-btn {
+            width: 100%;
+            padding: 18px;
+            background: linear-gradient(135deg, #fff 0%, #f0f0f0 100%);
+            border: none;
+            border-radius: 14px;
+            color: #667eea;
+            font-size: 16px;
+            font-weight: 600;
+            font-family: inherit;
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+            transition: all 0.4s ease;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        }
+
+        .login-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
+            transition: left 0.5s ease;
+        }
+
+        .login-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.2);
+        }
+
+        .login-btn:hover::before {
+            left: 100%;
+        }
+
+        .login-btn:active {
+            transform: translateY(-1px);
+        }
+
+        /* 加载动画 */
+        .login-btn.loading {
+            color: transparent;
+            pointer-events: none;
+        }
+
+        .login-btn.loading::after {
+            content: '';
+            position: absolute;
+            width: 24px;
+            height: 24px;
+            border: 3px solid #667eea;
+            border-top-color: transparent;
+            border-radius: 50%;
+            left: 50%;
+            top: 50%;
+            transform: translate(-50%, -50%);
+            animation: spin 0.8s linear infinite;
+        }
+
+        @keyframes spin {
+            to {
+                transform: translate(-50%, -50%) rotate(360deg);
+            }
+        }
+
+        /* 成功动画 */
+        .login-btn.success {
+            background: linear-gradient(135deg, #4CAF50, #45a049);
+            color: #fff;
+        }
+
+        .login-btn.success::after {
+            content: '✓';
+            position: absolute;
+            left: 50%;
+            top: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 24px;
+            animation: checkmark 0.5s ease forwards;
+        }
+
+        @keyframes checkmark {
+            from {
+                opacity: 0;
+                transform: translate(-50%, -50%) scale(0);
+            }
+            to {
+                opacity: 1;
+                transform: translate(-50%, -50%) scale(1);
+            }
+        }
+
+        /* 分割线 */
+        .divider {
+            display: flex;
+            align-items: center;
+            margin: 30px 0;
+        }
+
+        .divider::before,
+        .divider::after {
+            content: '';
+            flex: 1;
+            height: 1px;
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        .divider span {
+            color: rgba(255, 255, 255, 0.5);
+            font-size: 14px;
+            padding: 0 20px;
+        }
+
+        /* 社交登录 */
+        .social-login {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+        }
+
+        .social-btn {
+            width: 55px;
+            height: 55px;
+            border-radius: 14px;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        .social-btn svg {
+            width: 24px;
+            height: 24px;
+            fill: #fff;
+            transition: all 0.3s ease;
+        }
+
+        .social-btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: translateY(-5px) scale(1.05);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+        }
+
+        .social-btn:active {
+            transform: translateY(-2px) scale(1);
+        }
+
+        /* 注册链接 */
+        .signup-link {
+            text-align: center;
+            margin-top: 30px;
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 14px;
+        }
+
+        .signup-link a {
+            color: #fff;
+            text-decoration: none;
+            font-weight: 600;
+            margin-left: 5px;
+            position: relative;
+            transition: all 0.3s ease;
+        }
+
+        .signup-link a::after {
+            content: '';
+            position: absolute;
+            bottom: -2px;
+            left: 0;
+            width: 100%;
+            height: 2px;
+            background: #fff;
+            transform: scaleX(0);
+            transition: transform 0.3s ease;
+        }
+
+        .signup-link a:hover::after {
+            transform: scaleX(1);
+        }
+
+        /* 输入验证样式 */
+        .form-group.error input {
+            border-color: #ff6b6b;
+            animation: shake 0.5s ease;
+        }
+
+        .form-group.success input {
+            border-color: #4CAF50;
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            20%, 60% { transform: translateX(-5px); }
+            40%, 80% { transform: translateX(5px); }
+        }
+
+        .error-message {
+            color: #ff6b6b;
+            font-size: 12px;
+            margin-top: 5px;
+            padding-left: 20px;
+            opacity: 0;
+            transform: translateY(-10px);
+            transition: all 0.3s ease;
+        }
+
+        .form-group.error .error-message {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* 密码可见性切换 */
+        .password-toggle {
+            position: absolute;
+            right: 20px;
+            top: 50%;
+            transform: translateY(-50%);
+            cursor: pointer;
+            padding: 5px;
+        }
+
+        .password-toggle svg {
+            width: 20px;
+            height: 20px;
+            fill: rgba(255, 255, 255, 0.5);
+            transition: all 0.3s ease;
+        }
+
+        .password-toggle:hover svg {
+            fill: #fff;
+        }
+
+        /* 响应式 */
+        @media (max-width: 480px) {
+            .login-container {
+                width: 90%;
+                padding: 40px 25px;
+            }
+
+            h1 {
+                font-size: 24px;
+            }
+        }
     </style>
 </head>
 <body>
+    <!-- 动态背景 -->
+    <div class="background">
+        <div class="bubble"></div>
+        <div class="bubble"></div>
+        <div class="bubble"></div>
+        <div class="bubble"></div>
+        <div class="bubble"></div>
+    </div>
 
-    <!-- 封禁 -->
-    <div id="banned-screen" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:black; color:red; z-index:99999; flex-direction:column; justify-content:center; align-items:center; text-align:center;"><h1>🚫</h1><h2>ACCESS DENIED</h2></div>
-
-    <header>
-        <div class="logo">🧊 Icecube Store</div>
-        <div class="nav-right">
-            <button class="btn btn-icon" onclick="openNotices()">🔔</button>
-            <span id="user-name" style="font-size:14px; font-weight:bold; color:#666"></span>
-            <button class="btn btn-black" id="btn-login" onclick="openAuth()">登录</button>
-            <button class="btn btn-black" id="btn-orders" onclick="openOrders()" style="display:none">📦 订单</button>
-            <button class="btn btn-red" id="btn-logout" onclick="logout()">退出</button>
-            <button class="btn btn-cart" onclick="toggleSidebar('cart')">🛒 <span id="cart-count">0</span></button>
+    <!-- 登录容器 -->
+    <div class="login-container">
+        <!-- Logo -->
+        <div class="logo">
+            <svg viewBox="0 0 24 24">
+                <defs>
+                    <linearGradient id="logoGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                        <stop offset="0%" style="stop-color:#667eea"/>
+                        <stop offset="100%" style="stop-color:#764ba2"/>
+                    </linearGradient>
+                </defs>
+                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
+            </svg>
         </div>
-    </header>
 
-    <div class="container">
-        <h3 style="margin-top:30px">🔥 热销商品</h3>
-        <div id="product-list" class="grid">加载中...</div>
-    </div>
+        <h1>欢迎回来</h1>
+        <p class="subtitle">登录以继续您的精彩旅程</p>
 
-    <!-- 侧边栏 (购物车/订单/公告) -->
-    <div class="sidebar-overlay" id="overlay" onclick="closeSidebar()"></div>
-    <div class="sidebar" id="sb-cart">
-        <div class="sb-header"><span>购物车</span><span onclick="closeSidebar()" style="cursor:pointer">✕</span></div>
-        <div class="sb-content" id="cart-list"></div>
-        <div style="padding:20px; border-top:1px solid #eee;"><div style="display:flex;justify-content:space-between;margin-bottom:10px;"><span>总计:</span><span style="color:red">¥<span id="total-price">0</span></span></div><button class="btn-black" style="width:100%" onclick="showPay()">结算</button></div>
-    </div>
-    <div class="sidebar" id="sb-orders"><div class="sb-header"><span>我的订单</span><span onclick="closeSidebar()" style="cursor:pointer">✕</span></div><div class="sb-content" id="order-list"></div></div>
-    <div class="sidebar" id="sb-notices"><div class="sb-header"><span>公告</span><span onclick="closeSidebar()" style="cursor:pointer">✕</span></div><div class="sb-content" id="notice-list"></div></div>
-
-    <!-- 弹窗 -->
-    <div class="modal-overlay" id="pay-modal"><div class="modal-box"><h3>扫码支付</h3><p style="color:red;font-weight:bold">¥<span id="pay-amount">0</span></p><img id="qr-img" style="width:200px"><br><button class="btn-black" style="width:100%;margin-top:10px" onclick="confirmPaid()">✅ 我已付款</button><button class="btn" style="margin-top:10px" onclick="document.getElementById('pay-modal').style.display='none'">关闭</button></div></div>
-    
-    <div class="modal-overlay" id="auth-modal"><div class="modal-box"><h2 id="auth-title">登录</h2><input id="u-email" class="auth-input" placeholder="邮箱"><input id="u-pass" type="password" class="auth-input" placeholder="密码"><div id="captcha-area"><div class="captcha-row"><input id="c-input" class="auth-input" placeholder="验证码"><canvas id="captcha-canvas" width="100" height="40" onclick="drawC()"></canvas></div></div><button class="btn-black" style="width:100%;margin-top:10px" onclick="submitAuth()" id="auth-btn">登录</button><div style="margin-top:10px;color:blue;cursor:pointer;text-decoration:underline" onclick="toggleAuthMode()" id="switch-txt">去注册</div><div style="margin-top:5px;color:#888;cursor:pointer" onclick="document.getElementById('auth-modal').style.display='none'">关闭</div></div></div>
-
-    <!-- 聊天 -->
-    <div class="chat-widget">
-        <div class="chat-box" id="chat-win">
-            <div id="chat-header" class="chat-header">
-                <span id="chat-title">📢 公共大厅</span>
-                <div>
-                    <span id="back-public" class="back-public" style="display:none" onclick="enterPublicChat()">返回大厅</span>
-                    <span style="cursor:pointer" onclick="toggleChat()">✕</span>
-                </div>
+        <form id="loginForm">
+            <!-- 用户名输入 -->
+            <div class="form-group" id="usernameGroup">
+                <input type="text" id="username" placeholder=" " autocomplete="off">
+                <svg class="icon" viewBox="0 0 24 24">
+                    <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
+                </svg>
+                <label>用户名 / 邮箱</label>
+                <div class="error-message">请输入有效的用户名或邮箱</div>
             </div>
-            <div id="chat-notice" class="notice-bar">正在私密咨询订单问题</div>
-            <div class="chat-msgs" id="chat-hist"></div>
-            <div class="chat-input"><input id="chat-txt" style="flex:1" placeholder="..."><button onclick="sendMsg()" style="background:var(--primary);color:white;border:none;padding:0 10px;">发</button></div>
+
+            <!-- 密码输入 -->
+            <div class="form-group" id="passwordGroup">
+                <input type="password" id="password" placeholder=" " autocomplete="off">
+                <svg class="icon" viewBox="0 0 24 24">
+                    <path d="M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zm-6 9c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zm3.1-9H8.9V6c0-1.71 1.39-3.1 3.1-3.1 1.71 0 3.1 1.39 3.1 3.1v2z"/>
+                </svg>
+                <label>密码</label>
+                <div class="password-toggle" id="passwordToggle">
+                    <svg viewBox="0 0 24 24" id="eyeIcon">
+                        <path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"/>
+                    </svg>
+                </div>
+                <div class="error-message">密码长度至少为6位</div>
+            </div>
+
+            <!-- 选项 -->
+            <div class="form-options">
+                <label class="remember-me">
+                    <input type="checkbox">
+                    <div class="checkmark">
+                        <svg viewBox="0 0 24 24">
+                            <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+                        </svg>
+                    </div>
+                    <span>记住我</span>
+                </label>
+                <a href="#" class="forgot-password">忘记密码?</a>
+            </div>
+
+            <!-- 登录按钮 -->
+            <button type="submit" class="login-btn" id="loginBtn">
+                登录
+            </button>
+        </form>
+
+        <!-- 分割线 -->
+        <div class="divider">
+            <span>或使用以下方式登录</span>
         </div>
-        <div class="chat-icon" onclick="toggleChat()">💬</div>
+
+        <!-- 社交登录 -->
+        <div class="social-login">
+            <div class="social-btn" title="微信登录">
+                <svg viewBox="0 0 24 24">
+                    <path d="M8.691 2.188C3.891 2.188 0 5.476 0 9.53c0 2.212 1.17 4.203 3.002 5.55a.59.59 0 0 1 .213.665l-.39 1.48c-.019.07-.048.141-.048.213 0 .163.13.295.29.295a.326.326 0 0 0 .167-.054l1.903-1.114a.864.864 0 0 1 .717-.098 10.16 10.16 0 0 0 2.837.403c.276 0 .543-.027.811-.05-.857-2.578.157-4.972 1.932-6.446 1.703-1.415 3.882-1.98 5.853-1.838-.576-3.583-4.196-6.348-8.596-6.348zM5.785 5.991c.642 0 1.162.529 1.162 1.18a1.17 1.17 0 0 1-1.162 1.178A1.17 1.17 0 0 1 4.623 7.17c0-.651.52-1.18 1.162-1.18zm5.813 0c.642 0 1.162.529 1.162 1.18a1.17 1.17 0 0 1-1.162 1.178 1.17 1.17 0 0 1-1.162-1.178c0-.651.52-1.18 1.162-1.18zm5.34 2.867c-1.797-.052-3.746.512-5.28 1.786-1.72 1.428-2.687 3.72-1.78 6.22.942 2.453 3.666 4.229 6.884 4.229.826 0 1.622-.12 2.361-.336a.722.722 0 0 1 .598.082l1.584.926a.272.272 0 0 0 .14.047c.134 0 .24-.111.24-.247 0-.06-.023-.12-.038-.177l-.327-1.233a.582.582 0 0 1-.023-.156.49.49 0 0 1 .201-.398C23.024 18.48 24 16.82 24 14.98c0-3.21-2.931-5.837-6.656-6.088V8.89c-.135-.006-.27-.022-.407-.03zm-2.53 3.274c.535 0 .969.44.969.982a.976.976 0 0 1-.969.983.976.976 0 0 1-.969-.983c0-.542.434-.982.97-.982zm4.844 0c.535 0 .969.44.969.982a.976.976 0 0 1-.969.983.976.976 0 0 1-.969-.983c0-.542.434-.982.969-.982z"/>
+                </svg>
+            </div>
+            <div class="social-btn" title="QQ登录">
+                <svg viewBox="0 0 24 24">
+                    <path d="M12.003 2c-2.265 0-6.29 1.364-6.29 7.325v1.195S3.55 14.96 3.55 17.474c0 .665.17 1.025.281 1.025.114 0 .902-.484 1.748-2.072 0 0-.18 2.197 1.904 3.967 0 0-1.77.495-1.77 1.182 0 .686 4.078.43 6.29.43 2.212 0 6.29.256 6.29-.43 0-.687-1.77-1.182-1.77-1.182 2.085-1.77 1.905-3.967 1.905-3.967.845 1.588 1.633 2.072 1.746 2.072.111 0 .283-.36.283-1.025 0-2.514-2.166-6.954-2.166-6.954V9.325C18.29 3.364 14.268 2 12.003 2z"/>
+                </svg>
+            </div>
+            <div class="social-btn" title="Google登录">
+                <svg viewBox="0 0 24 24">
+                    <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+                    <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+                    <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
+                    <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
+                </svg>
+            </div>
+            <div class="social-btn" title="GitHub登录">
+                <svg viewBox="0 0 24 24">
+                    <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/>
+                </svg>
+            </div>
+        </div>
+
+        <!-- 注册链接 -->
+        <p class="signup-link">
+            还没有账号?<a href="#">立即注册</a>
+        </p>
     </div>
 
     <script>
-        const CONFIG = { appId: "SKHyBQH4nGeF6PDB8MVLTMD4-MdYXbMMI", appKey: "kUQ2O1stpz6V8bNhcbk2tkrV", serverURL: "https://skhybqh4.api.lncldglobal.com" };
-        AV.init(CONFIG);
+        // DOM元素
+        const loginForm = document.getElementById('loginForm');
+        const loginBtn = document.getElementById('loginBtn');
+        const usernameInput = document.getElementById('username');
+        const passwordInput = document.getElementById('password');
+        const usernameGroup = document.getElementById('usernameGroup');
+        const passwordGroup = document.getElementById('passwordGroup');
+        const passwordToggle = document.getElementById('passwordToggle');
+        const eyeIcon = document.getElementById('eyeIcon');
 
-        let cart = JSON.parse(localStorage.getItem('myCart') || '[]');
-        let isReg = false; let realC = "";
-        let deviceId = localStorage.getItem('did') || 'dev_'+Date.now(); localStorage.setItem('did',deviceId);
-        
-        // 聊天状态
-        let currentChatMode = 'public'; // public 或 private
-        let currentOrderId = null; // 私聊时的订单ID
+        // 密码可见性切换
+        let passwordVisible = false;
+        passwordToggle.addEventListener('click', () => {
+            passwordVisible = !passwordVisible;
+            passwordInput.type = passwordVisible ? 'text' : 'password';
+            eyeIcon.innerHTML = passwordVisible 
+                ? '<path d="M12 7c2.76 0 5 2.24 5 5 0 .65-.13 1.26-.36 1.83l2.92 2.92c1.51-1.26 2.7-2.89 3.43-4.75-1.73-4.39-6-7.5-11-7.5-1.4 0-2.74.25-3.98.7l2.16 2.16C10.74 7.13 11.35 7 12 7zM2 4.27l2.28 2.28.46.46C3.08 8.3 1.78 10.02 1 12c1.73 4.39 6 7.5 11 7.5 1.55 0 3.03-.3 4.38-.84l.42.42L19.73 22 21 20.73 3.27 3 2 4.27zM7.53 9.8l1.55 1.55c-.05.21-.08.43-.08.65 0 1.66 1.34 3 3 3 .22 0 .44-.03.65-.08l1.55 1.55c-.67.33-1.41.53-2.2.53-2.76 0-5-2.24-5-5 0-.79.2-1.53.53-2.2zm4.31-.78l3.15 3.15.02-.16c0-1.66-1.34-3-3-3l-.17.01z"/>'
+                : '<path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"/>';
+        });
 
-        // 初始化
-        checkDevice(); checkUser(); loadProducts(); updateCartUI(); setInterval(loadChat, 3000);
-
-        // === 1. 聊天逻辑 (核心升级) ===
-        function toggleChat() { 
-            const w = document.getElementById('chat-win'); 
-            w.style.display = w.style.display==='flex'?'none':'flex';
-            if(w.style.display==='flex') loadChat();
+        // 验证函数
+        function validateUsername(username) {
+            return username.length >= 3;
         }
 
-        // 进入公共聊天
-        function enterPublicChat() {
-            currentChatMode = 'public';
-            currentOrderId = null;
-            document.getElementById('chat-header').className = 'chat-header'; // 蓝色
-            document.getElementById('chat-header').style.background = '';
-            document.getElementById('chat-title').innerText = "📢 公共大厅";
-            document.getElementById('chat-notice').style.display = 'none';
-            document.getElementById('back-public').style.display = 'none';
-            loadChat();
+        function validatePassword(password) {
+            return password.length >= 6;
         }
 
-        // 进入订单私聊
-        function contactSupport(orderId) {
-            closeSidebar();
-            const w = document.getElementById('chat-win');
-            w.style.display = 'flex';
-            
-            // 切换状态
-            currentChatMode = 'private';
-            currentOrderId = orderId;
-            
-            // UI 变化
-            document.getElementById('chat-header').className = 'chat-header private'; // 紫色样式
-            document.getElementById('chat-header').style.background = '#7c3aed';
-            document.getElementById('chat-title').innerText = "🔒 订单客服";
-            document.getElementById('chat-notice').style.display = 'block';
-            document.getElementById('back-public').style.display = 'inline';
-            
-            loadChat();
-        }
-
-        async function sendMsg() {
-            if(!AV.User.current()) return alert("请先登录");
-            const txt = document.getElementById('chat-txt').value; if(!txt) return;
-            
-            const C = AV.Object.extend('ChatMessage');
-            const m = new C();
-            m.set('content', txt);
-            m.set('senderName', AV.User.current().getUsername());
-            m.set('isAdmin', false);
-            
-            if (currentChatMode === 'private') {
-                m.set('isPrivate', true);
-                m.set('channel', 'order_' + currentOrderId); // 频道ID
-                m.set('orderId', currentOrderId);
+        // 实时验证
+        usernameInput.addEventListener('input', () => {
+            if (usernameInput.value.length > 0) {
+                if (validateUsername(usernameInput.value)) {
+                    usernameGroup.classList.remove('error');
+                    usernameGroup.classList.add('success');
+                } else {
+                    usernameGroup.classList.remove('success');
+                }
             } else {
-                m.set('isPrivate', false);
-                m.set('channel', 'public');
+                usernameGroup.classList.remove('error', 'success');
+            }
+        });
+
+        passwordInput.addEventListener('input', () => {
+            if (passwordInput.value.length > 0) {
+                if (validatePassword(passwordInput.value)) {
+                    passwordGroup.classList.remove('error');
+                    passwordGroup.classList.add('success');
+                } else {
+                    passwordGroup.classList.remove('success');
+                }
+            } else {
+                passwordGroup.classList.remove('error', 'success');
+            }
+        });
+
+        // 表单提交
+        loginForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            let isValid = true;
+
+            // 验证用户名
+            if (!validateUsername(usernameInput.value)) {
+                usernameGroup.classList.add('error');
+                isValid = false;
+            } else {
+                usernameGroup.classList.remove('error');
             }
 
-            await m.save();
-            document.getElementById('chat-txt').value='';
-            loadChat();
-        }
-
-        async function loadChat() {
-            if(document.getElementById('chat-win').style.display==='none') return;
-            
-            const q = new AV.Query('ChatMessage');
-            q.ascending('createdAt'); 
-            q.limit(50);
-
-            if (currentChatMode === 'private') {
-                // 私聊模式：只看当前订单的消息
-                q.equalTo('channel', 'order_' + currentOrderId);
+            // 验证密码
+            if (!validatePassword(passwordInput.value)) {
+                passwordGroup.classList.add('error');
+                isValid = false;
             } else {
-                // 公共模式：只看非私密消息 (channel为public或空)
-                const q1 = new AV.Query('ChatMessage'); q1.doesNotExist('isPrivate'); // 旧数据兼容
-                const q2 = new AV.Query('ChatMessage'); q2.equalTo('isPrivate', false);
-                const mainQ = AV.Query.or(q1, q2);
-                // 此时 q 需要被 mainQ 替换，但 LeanCloud SDK 组合查询写法略繁琐
-                // 简化处理：我们直接查 channel == public 或 null
-                q.notEqualTo('isPrivate', true); 
+                passwordGroup.classList.remove('error');
             }
 
-            const msgs = await q.find();
-            const div = document.getElementById('chat-hist'); div.innerHTML = "";
-            const me = AV.User.current() ? AV.User.current().getUsername() : "";
+            if (!isValid) return;
+
+            // 模拟登录过程
+            loginBtn.classList.add('loading');
+            loginBtn.disabled = true;
+
+            await new Promise(resolve => setTimeout(resolve, 2000));
+
+            loginBtn.classList.remove('loading');
+            loginBtn.classList.add('success');
+
+            await new Promise(resolve => setTimeout(resolve, 1500));
+
+            // 这里可以跳转到主页
+            alert('🎉 登录成功！欢迎回来！');
             
-            msgs.forEach(m => {
-                const isMe = m.get('senderName') === me;
-                const isAdmin = m.get('isAdmin');
-                div.innerHTML += `<div class="msg ${isMe?'msg-me':'msg-other'}"><b>${isAdmin?'客服':m.get('senderName')}:</b> ${m.get('content')}</div>`;
-            });
-            div.scrollTop = div.scrollHeight;
-        }
+            // 重置按钮状态
+            loginBtn.classList.remove('success');
+            loginBtn.disabled = false;
+        });
 
-        // === 2. 订单与支付 ===
-        async function openOrders() {
-            toggleSidebar('orders');
-            const d = document.getElementById('order-list'); d.innerHTML="加载中...";
-            const q = new AV.Query('Order'); q.equalTo('user', AV.User.current()); q.descending('createdAt');
-            const res = await q.find(); d.innerHTML = ""; if(res.length===0) d.innerHTML="无订单";
-            res.forEach(o => {
-                const s = o.get('status');
-                const items = o.get('items').map(i=>`${i.name}x${i.count}`).join(', ');
-                d.innerHTML += `
-                    <div class="order-card">
-                        <div class="order-head"><span>${o.createdAt.toLocaleString()}</span><span>${s==='paid'?'✅':'⏳'}</span></div>
-                        <div style="font-size:13px;margin-bottom:5px;">${items}</div>
-                        <div style="text-align:right;font-weight:bold">¥${o.get('total')}</div>
-                        <button class="contact-btn" onclick="contactSupport('${o.id}')">💬 联系客服 (订单私聊)</button>
-                    </div>`;
+        // 社交按钮点击效果
+        document.querySelectorAll('.social-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                this.style.transform = 'scale(0.95)';
+                setTimeout(() => {
+                    this.style.transform = '';
+                }, 150);
             });
-        }
-        async function showPay() {
-            const t = document.getElementById('total-price').innerText; if(t=="0")return alert("空");
-            document.getElementById('pay-modal').style.display='flex';
-            document.getElementById('pay-amount').innerText = t;
-            const q=new AV.Query('GlobalConfig'); const c=await q.first(); document.getElementById('qr-img').src=c?c.get('paymentQR'):"";
-        }
-        async function confirmPaid() {
-            if(!confirm("确认已付款？")) return;
-            const Order = AV.Object.extend('Order'); const o = new Order();
-            o.set('user', AV.User.current()); o.set('items', cart); o.set('total', Number(document.getElementById('total-price').innerText));
-            o.set('status', 'pending'); o.set('email', AV.User.current().getEmail());
-            await o.save(); cart=[]; saveCart(); document.getElementById('pay-modal').style.display='none'; closeSidebar(); alert("订单已提交，待审核"); openOrders();
-        }
+        });
 
-        // === 3. 基础功能 (用户/商品/公告) ===
-        function toggleSidebar(id) { document.querySelectorAll('.sidebar').forEach(s=>s.classList.remove('open')); document.getElementById('overlay').style.display='block'; document.getElementById('sb-'+id).classList.add('open'); }
-        function closeSidebar() { document.querySelectorAll('.sidebar').forEach(s=>s.classList.remove('open')); document.getElementById('overlay').style.display='none'; }
-        
-        async function checkDevice() { const q=new AV.Query('DeviceBlacklist'); q.equalTo('deviceId',deviceId); if(await q.first()){document.getElementById('banned-screen').style.display='flex';AV.User.logOut();throw new Error("Banned");} }
-        function checkUser() { const u=AV.User.current(); if(u){document.getElementById('user-name').innerText=u.getUsername();document.getElementById('btn-login').style.display='none';document.getElementById('btn-logout').style.display='block';document.getElementById('btn-orders').style.display='block';} }
-        function logout() { AV.User.logOut(); location.reload(); }
-        function openAuth() { document.getElementById('auth-modal').style.display='flex'; }
-        function toggleAuthMode() { isReg=!isReg; document.getElementById('auth-title').innerText=isReg?"注册":"登录"; document.getElementById('auth-btn').innerText=isReg?"注册":"登录"; document.getElementById('switch-txt').innerText=isReg?"返回登录":"去注册"; document.getElementById('captcha-area').style.display=isReg?'block':'none'; if(isReg)drawC(); }
-        function drawC() { const ctx=document.getElementById('captcha-canvas').getContext('2d'); ctx.fillStyle='#eee'; ctx.fillRect(0,0,100,40); const s='ABCDEFGHJKLMNPQRSTUVWXYZ23456789'; realC=''; for(let i=0;i<4;i++)realC+=s[Math.floor(Math.random()*s.length)]; ctx.fillStyle='#333'; ctx.font='20px Arial'; ctx.fillText(realC,25,28); }
-        async function submitAuth() { const e=document.getElementById('u-email').value, p=document.getElementById('u-pass').value; try{ if(isReg){ if(document.getElementById('c-input').value.toUpperCase()!==realC)return alert("验证码错"); const u=new AV.User();u.setUsername(e);u.setPassword(p);u.setEmail(e);await u.signUp();alert("注册成功，请激活");toggleAuthMode(); }else{ await AV.User.logIn(e,p); const q=new AV.Query('Blacklist');q.equalTo('email',e);if(await q.count()>0){alert("已封禁");AV.User.logOut();return;} location.reload(); } }catch(err){alert(err.message);if(isReg)drawC();} }
-        
-        async function loadProducts() { const q=new AV.Query('Product'); q.descending('createdAt'); const res=await q.find(); document.getElementById('product-list').innerHTML=res.map(p=>`<div class="card"><img src="${p.get('image')}"><div class="info"><div class="title">${p.get('name')}</div><div class="price">¥${p.get('price')}</div><button class="btn-add" onclick='addToCart({id:"${p.id}",name:"${p.get('name')}",price:${p.get('price')},image:"${p.get('image')}"})'>+ 购物车</button></div></div>`).join(''); }
-        function addToCart(item) { if(!AV.User.current())return openAuth(); const ex=cart.find(x=>x.id===item.id); if(ex)ex.count++; else cart.push({...item,count:1}); saveCart(); toggleSidebar('cart'); }
-        function saveCart() { localStorage.setItem('myCart', JSON.stringify(cart)); updateCartUI(); }
-        function updateCartUI() { document.getElementById('cart-count').innerText=cart.reduce((a,b)=>a+b.count,0); const l=document.getElementById('cart-list'); l.innerHTML=""; let t=0; cart.forEach((i,idx)=>{t+=i.price*i.count; l.innerHTML+=`<div style="display:flex;gap:10px;border-bottom:1px solid #eee;padding:10px"><img src="${i.image}" style="width:50px;height:50px"><div style="flex:1">${i.name}<br>¥${i.price}</div><button onclick="chQ(${idx},-1)">-</button>${i.count}<button onclick="chQ(${idx},1)">+</button></div>`}); document.getElementById('total-price').innerText=t; }
-        function chQ(i,d){cart[i].count+=d;if(cart[i].count<=0)cart.splice(i,1);saveCart();}
-        async function openNotices(){ toggleSidebar('notices'); const q=new AV.Query('Announcement'); q.descending('createdAt'); const res=await q.find(); document.getElementById('notice-list').innerHTML=res.map(n=>`<div style="padding:10px;border-bottom:1px solid #eee;background:#fff3cd;margin-bottom:5px">${n.get('content')}<div style="font-size:12px;color:#888">${n.createdAt.toLocaleString()}</div></div>`).join(''); }
+        // 添加输入框焦点音效（可选）
+        const inputs = document.querySelectorAll('input');
+        inputs.forEach(input => {
+            input.addEventListener('focus', () => {
+                // 可以在这里添加焦点音效
+            });
+        });
     </script>
 </body>
 </html>

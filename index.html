@@ -6,65 +6,802 @@
     <title>Icecube Store | 官方旗舰店</title>
     <script src="https://cdn.jsdelivr.net/npm/leancloud-storage@4.12.0/dist/av-min.js"></script>
     <style>
-        /* === 样式区 === */
-        :root { --primary: #2563eb; --bg: #f3f4f6; --text: #1f2937; --red: #dc2626; --green: #059669; }
-        body { font-family: 'Segoe UI', sans-serif; background: var(--bg); margin: 0; color: var(--text); }
+        /* === 优化后的样式区 === */
+        :root { 
+            --primary: #2563eb; 
+            --primary-dark: #1d4ed8;
+            --bg: #f8fafc; 
+            --text: #1f2937; 
+            --red: #ef4444; 
+            --red-dark: #dc2626;
+            --green: #10b981; 
+            --purple: #8b5cf6;
+            --purple-dark: #7c3aed;
+            --shadow-sm: 0 1px 3px rgba(0,0,0,0.08);
+            --shadow-md: 0 4px 12px rgba(0,0,0,0.1);
+            --shadow-lg: 0 10px 30px rgba(0,0,0,0.15);
+            --radius-sm: 8px;
+            --radius-md: 12px;
+            --radius-lg: 16px;
+        }
         
-        header { background: white; padding: 15px 20px; position: sticky; top: 0; z-index: 100; box-shadow: 0 1px 3px rgba(0,0,0,0.1); display: flex; justify-content: space-between; align-items: center; }
-        .logo { font-size: 1.5rem; font-weight: bold; color: var(--primary); }
-        .nav-right { display: flex; align-items: center; gap: 10px; }
-        .btn { padding: 8px 15px; border-radius: 20px; cursor: pointer; border: none; font-size: 0.9rem; transition: 0.2s; }
-        .btn-black { background: #111; color: white; }
-        .btn-red { background: var(--red); color: white; display: none; }
-        .btn-cart { background: var(--primary); color: white; display: flex; align-items: center; gap: 5px; }
+        * { box-sizing: border-box; }
+        
+        body { 
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB', sans-serif; 
+            background: var(--bg); 
+            margin: 0; 
+            color: var(--text);
+            line-height: 1.6;
+        }
+        
+        /* === Header 优化 === */
+        header { 
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 16px 24px; 
+            position: sticky; 
+            top: 0; 
+            z-index: 100; 
+            box-shadow: var(--shadow-md);
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center;
+            backdrop-filter: blur(10px);
+            animation: slideDown 0.5s ease-out;
+        }
+        
+        @keyframes slideDown {
+            from { transform: translateY(-100%); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+        
+        .logo { 
+            font-size: 1.6rem; 
+            font-weight: 800; 
+            color: white;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: transform 0.3s ease;
+        }
+        
+        .logo:hover {
+            transform: scale(1.05);
+        }
+        
+        .nav-right { 
+            display: flex; 
+            align-items: center; 
+            gap: 12px; 
+        }
+        
+        .btn { 
+            padding: 10px 18px; 
+            border-radius: 24px; 
+            cursor: pointer; 
+            border: none; 
+            font-size: 0.9rem; 
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            font-weight: 500;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .btn::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.3);
+            transform: translate(-50%, -50%);
+            transition: width 0.5s, height 0.5s;
+        }
+        
+        .btn:hover::before {
+            width: 300px;
+            height: 300px;
+        }
+        
+        .btn:active {
+            transform: scale(0.95);
+        }
+        
+        .btn-icon {
+            background: rgba(255,255,255,0.2);
+            color: white;
+            width: 40px;
+            height: 40px;
+            padding: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+            backdrop-filter: blur(10px);
+        }
+        
+        .btn-icon:hover {
+            background: rgba(255,255,255,0.3);
+            transform: scale(1.1);
+        }
+        
+        .btn-black { 
+            background: rgba(255,255,255,0.95); 
+            color: #667eea;
+            box-shadow: var(--shadow-sm);
+        }
+        
+        .btn-black:hover {
+            background: white;
+            box-shadow: var(--shadow-md);
+            transform: translateY(-2px);
+        }
+        
+        .btn-red { 
+            background: var(--red); 
+            color: white; 
+            display: none;
+            box-shadow: var(--shadow-sm);
+        }
+        
+        .btn-red:hover {
+            background: var(--red-dark);
+            box-shadow: var(--shadow-md);
+        }
+        
+        .btn-cart { 
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white; 
+            display: flex; 
+            align-items: center; 
+            gap: 6px;
+            box-shadow: var(--shadow-md);
+            border: 2px solid rgba(255,255,255,0.3);
+        }
+        
+        .btn-cart:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+        }
+        
+        #user-name {
+            font-size: 14px; 
+            font-weight: 600; 
+            color: white;
+            background: rgba(255,255,255,0.2);
+            padding: 8px 16px;
+            border-radius: 20px;
+            backdrop-filter: blur(10px);
+        }
 
-        .container { max-width: 1200px; margin: 20px auto; padding: 0 20px; }
-        .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 20px; }
-        .card { background: white; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 6px rgba(0,0,0,0.05); }
-        .card img { width: 100%; height: 200px; object-fit: cover; }
-        .info { padding: 15px; }
-        .title { font-weight: bold; margin-bottom: 5px; height: 24px; overflow: hidden; }
-        .price { color: var(--red); font-size: 1.2rem; font-weight: bold; }
-        .btn-add { width: 100%; padding: 8px; background: #333; color: white; border: none; border-radius: 4px; cursor: pointer; margin-top: 10px; }
+        /* === Container 优化 === */
+        .container { 
+            max-width: 1200px; 
+            margin: 30px auto; 
+            padding: 0 24px;
+            animation: fadeIn 0.6s ease-out;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .grid { 
+            display: grid; 
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); 
+            gap: 24px;
+            margin-top: 20px;
+        }
+        
+        /* === Card 优化 === */
+        .card { 
+            background: white; 
+            border-radius: var(--radius-lg); 
+            overflow: hidden; 
+            box-shadow: var(--shadow-sm);
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            cursor: pointer;
+            position: relative;
+        }
+        
+        .card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.1) 100%);
+            opacity: 0;
+            transition: opacity 0.4s;
+            z-index: 1;
+        }
+        
+        .card:hover {
+            transform: translateY(-8px);
+            box-shadow: var(--shadow-lg);
+        }
+        
+        .card:hover::before {
+            opacity: 1;
+        }
+        
+        .card img { 
+            width: 100%; 
+            height: 220px; 
+            object-fit: cover;
+            transition: transform 0.4s ease;
+        }
+        
+        .card:hover img {
+            transform: scale(1.1);
+        }
+        
+        .info { 
+            padding: 18px;
+            position: relative;
+            z-index: 2;
+        }
+        
+        .title { 
+            font-weight: 600; 
+            margin-bottom: 8px; 
+            height: 24px; 
+            overflow: hidden;
+            font-size: 1.05rem;
+            color: #1f2937;
+        }
+        
+        .price { 
+            color: var(--red); 
+            font-size: 1.4rem; 
+            font-weight: 700;
+            margin-bottom: 12px;
+        }
+        
+        .btn-add { 
+            width: 100%; 
+            padding: 12px; 
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white; 
+            border: none; 
+            border-radius: var(--radius-sm); 
+            cursor: pointer; 
+            margin-top: 10px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            box-shadow: var(--shadow-sm);
+        }
+        
+        .btn-add:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(102, 126, 234, 0.4);
+        }
+        
+        .btn-add:active {
+            transform: scale(0.98);
+        }
 
-        /* 侧边栏 & 弹窗 */
-        .sidebar-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 999; display: none; }
-        .sidebar { position: fixed; top: 0; right: -450px; width: 400px; height: 100vh; background: white; z-index: 1000; transition: 0.3s; display: flex; flex-direction: column; box-shadow: -5px 0 15px rgba(0,0,0,0.1); }
-        .sidebar.open { right: 0; }
-        .sb-header { padding: 20px; border-bottom: 1px solid #eee; font-weight: bold; display: flex; justify-content: space-between; }
-        .sb-content { flex: 1; overflow-y: auto; padding: 15px; background: #f9f9f9; }
+        /* === 侧边栏优化 === */
+        .sidebar-overlay { 
+            position: fixed; 
+            top: 0; 
+            left: 0; 
+            width: 100%; 
+            height: 100%; 
+            background: rgba(0,0,0,0.6); 
+            z-index: 999; 
+            display: none;
+            backdrop-filter: blur(4px);
+            animation: fadeInOverlay 0.3s ease;
+        }
         
-        .order-card { background: white; padding: 15px; border-radius: 8px; margin-bottom: 15px; border: 1px solid #eee; }
-        .order-head { display: flex; justify-content: space-between; font-size: 12px; color: #666; margin-bottom: 10px; border-bottom: 1px dashed #eee; padding-bottom: 5px; }
-        .contact-btn { background: white; border: 1px solid var(--primary); color: var(--primary); padding: 5px 10px; border-radius: 4px; font-size: 12px; cursor: pointer; margin-top: 10px; width: 100%; }
+        @keyframes fadeInOverlay {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
         
-        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 2000; display: none; justify-content: center; align-items: center; }
-        .modal-box { background: white; padding: 30px; border-radius: 12px; width: 320px; text-align: center; }
-        .auth-input { width: 100%; padding: 10px; margin: 8px 0; border: 1px solid #ddd; border-radius: 4px; box-sizing: border-box; }
-        #captcha-area { display: none; } .captcha-row { display: flex; gap: 5px; align-items: center; margin: 8px 0; } #captcha-canvas { border: 1px solid #ddd; cursor: pointer; }
+        .sidebar { 
+            position: fixed; 
+            top: 0; 
+            right: -450px; 
+            width: 420px; 
+            height: 100vh; 
+            background: white; 
+            z-index: 1000; 
+            transition: right 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            display: flex; 
+            flex-direction: column; 
+            box-shadow: -10px 0 30px rgba(0,0,0,0.2);
+        }
+        
+        .sidebar.open { 
+            right: 0; 
+        }
+        
+        .sb-header { 
+            padding: 24px; 
+            border-bottom: 2px solid #f3f4f6; 
+            font-weight: 700; 
+            display: flex; 
+            justify-content: space-between;
+            font-size: 1.2rem;
+            background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+        }
+        
+        .sb-header span:last-child {
+            cursor: pointer;
+            width: 32px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            transition: all 0.3s;
+            background: rgba(0,0,0,0.05);
+        }
+        
+        .sb-header span:last-child:hover {
+            background: rgba(0,0,0,0.1);
+            transform: rotate(90deg);
+        }
+        
+        .sb-content { 
+            flex: 1; 
+            overflow-y: auto; 
+            padding: 20px; 
+            background: #f8fafc;
+        }
+        
+        .sb-content::-webkit-scrollbar {
+            width: 8px;
+        }
+        
+        .sb-content::-webkit-scrollbar-track {
+            background: #f1f5f9;
+        }
+        
+        .sb-content::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 4px;
+        }
+        
+        .sb-content::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
+        }
+        
+        /* === 订单卡片优化 === */
+        .order-card { 
+            background: white; 
+            padding: 18px; 
+            border-radius: var(--radius-md); 
+            margin-bottom: 16px; 
+            border: 1px solid #e5e7eb;
+            transition: all 0.3s ease;
+            box-shadow: var(--shadow-sm);
+        }
+        
+        .order-card:hover {
+            box-shadow: var(--shadow-md);
+            transform: translateX(-4px);
+        }
+        
+        .order-head { 
+            display: flex; 
+            justify-content: space-between; 
+            font-size: 12px; 
+            color: #6b7280; 
+            margin-bottom: 12px; 
+            border-bottom: 1px dashed #e5e7eb; 
+            padding-bottom: 8px; 
+        }
+        
+        .contact-btn { 
+            background: linear-gradient(135deg, var(--primary) 0%, var(--purple) 100%);
+            border: none;
+            color: white;
+            padding: 10px 16px; 
+            border-radius: var(--radius-sm); 
+            font-size: 13px; 
+            cursor: pointer; 
+            margin-top: 12px; 
+            width: 100%;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            box-shadow: var(--shadow-sm);
+        }
+        
+        .contact-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(139, 92, 246, 0.4);
+        }
+        
+        /* === 弹窗优化 === */
+        .modal-overlay { 
+            position: fixed; 
+            top: 0; 
+            left: 0; 
+            width: 100%; 
+            height: 100%; 
+            background: rgba(0,0,0,0.7); 
+            z-index: 2000; 
+            display: none; 
+            justify-content: center; 
+            align-items: center;
+            backdrop-filter: blur(6px);
+            animation: fadeInOverlay 0.3s ease;
+        }
+        
+        .modal-box { 
+            background: white; 
+            padding: 36px; 
+            border-radius: var(--radius-lg); 
+            width: 360px; 
+            text-align: center;
+            box-shadow: var(--shadow-lg);
+            animation: modalSlideUp 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        
+        @keyframes modalSlideUp {
+            from { transform: translateY(50px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+        
+        .modal-box h2, .modal-box h3 {
+            margin-top: 0;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .auth-input { 
+            width: 100%; 
+            padding: 14px; 
+            margin: 10px 0; 
+            border: 2px solid #e5e7eb; 
+            border-radius: var(--radius-sm); 
+            box-sizing: border-box;
+            transition: all 0.3s ease;
+            font-size: 0.95rem;
+        }
+        
+        .auth-input:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+        }
+        
+        #captcha-area { 
+            display: none; 
+        }
+        
+        .captcha-row { 
+            display: flex; 
+            gap: 8px; 
+            align-items: center; 
+            margin: 10px 0; 
+        }
+        
+        #captcha-canvas { 
+            border: 2px solid #e5e7eb; 
+            cursor: pointer;
+            border-radius: var(--radius-sm);
+            transition: all 0.3s ease;
+        }
+        
+        #captcha-canvas:hover {
+            border-color: var(--primary);
+            box-shadow: var(--shadow-sm);
+        }
 
-        /* === 聊天挂件 === */
-        .chat-widget { position: fixed; bottom: 20px; right: 20px; z-index: 900; }
-        .chat-icon { width: 60px; height: 60px; background: var(--primary); border-radius: 50%; color: white; display: flex; justify-content: center; align-items: center; font-size: 30px; cursor: pointer; box-shadow: 0 5px 15px rgba(37, 99, 235, 0.4); }
-        .chat-box { position: absolute; bottom: 80px; right: 0; width: 320px; height: 450px; background: white; border-radius: 12px; box-shadow: 0 5px 20px rgba(0,0,0,0.2); display: none; flex-direction: column; overflow: hidden; }
+        /* === 聊天挂件优化 === */
+        .chat-widget { 
+            position: fixed; 
+            bottom: 24px; 
+            right: 24px; 
+            z-index: 900; 
+        }
         
-        .chat-header { background: var(--primary); color: white; padding: 10px; font-weight: bold; display: flex; justify-content: space-between; align-items: center; }
-        .chat-header.private { background: #7c3aed; } /* 私聊变紫色 */
+        .chat-icon { 
+            width: 64px; 
+            height: 64px; 
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 50%; 
+            color: white; 
+            display: flex; 
+            justify-content: center; 
+            align-items: center; 
+            font-size: 32px; 
+            cursor: pointer; 
+            box-shadow: 0 8px 24px rgba(102, 126, 234, 0.5);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            animation: pulse 2s infinite;
+        }
         
-        .chat-msgs { flex: 1; padding: 10px; overflow-y: auto; background: #f9f9f9; display: flex; flex-direction: column; gap: 8px; }
-        .chat-input { padding: 10px; border-top: 1px solid #eee; display: flex; gap: 5px; }
-        .msg { padding: 6px 10px; border-radius: 6px; max-width: 80%; font-size: 13px; word-wrap: break-word; }
-        .msg-me { background: #dbeafe; align-self: flex-end; color: #1e40af; }
-        .msg-other { background: #fff; border: 1px solid #ddd; align-self: flex-start; }
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
         
-        .notice-bar { background: #fff3cd; padding: 8px; font-size: 12px; text-align: center; color: #856404; display: none; }
-        .back-public { font-size: 12px; text-decoration: underline; cursor: pointer; color: white; margin-right: 10px;}
+        .chat-icon:hover {
+            transform: scale(1.1);
+            box-shadow: 0 12px 32px rgba(102, 126, 234, 0.6);
+        }
+        
+        .chat-box { 
+            position: absolute; 
+            bottom: 84px; 
+            right: 0; 
+            width: 360px; 
+            height: 500px; 
+            background: white; 
+            border-radius: var(--radius-lg); 
+            box-shadow: var(--shadow-lg);
+            display: none; 
+            flex-direction: column; 
+            overflow: hidden;
+            animation: chatSlideUp 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        
+        @keyframes chatSlideUp {
+            from { transform: translateY(20px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+        
+        .chat-header { 
+            background: linear-gradient(135deg, var(--primary) 0%, var(--purple) 100%);
+            color: white; 
+            padding: 16px; 
+            font-weight: 700; 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        
+        .chat-header.private { 
+            background: linear-gradient(135deg, var(--purple) 0%, var(--purple-dark) 100%);
+        }
+        
+        .chat-msgs { 
+            flex: 1; 
+            padding: 16px; 
+            overflow-y: auto; 
+            background: linear-gradient(to bottom, #f8fafc 0%, #ffffff 100%);
+            display: flex; 
+            flex-direction: column; 
+            gap: 10px; 
+        }
+        
+        .chat-msgs::-webkit-scrollbar {
+            width: 6px;
+        }
+        
+        .chat-msgs::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        
+        .chat-msgs::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 3px;
+        }
+        
+        .chat-input { 
+            padding: 16px; 
+            border-top: 2px solid #f3f4f6; 
+            display: flex; 
+            gap: 8px;
+            background: white;
+        }
+        
+        .chat-input input {
+            flex: 1;
+            padding: 12px;
+            border: 2px solid #e5e7eb;
+            border-radius: 24px;
+            font-size: 0.9rem;
+            transition: all 0.3s ease;
+        }
+        
+        .chat-input input:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+        }
+        
+        .chat-input button {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--purple) 100%);
+            color: white;
+            border: none;
+            padding: 0 24px;
+            border-radius: 24px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: var(--shadow-sm);
+        }
+        
+        .chat-input button:hover {
+            transform: scale(1.05);
+            box-shadow: var(--shadow-md);
+        }
+        
+        .msg { 
+            padding: 10px 14px; 
+            border-radius: 16px; 
+            max-width: 80%; 
+            font-size: 0.9rem; 
+            word-wrap: break-word;
+            animation: messageSlide 0.3s ease;
+            line-height: 1.5;
+        }
+        
+        @keyframes messageSlide {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .msg-me { 
+            background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%);
+            align-self: flex-end; 
+            color: #1e40af;
+            border-bottom-right-radius: 4px;
+            box-shadow: var(--shadow-sm);
+        }
+        
+        .msg-other { 
+            background: white;
+            border: 1px solid #e5e7eb; 
+            align-self: flex-start;
+            border-bottom-left-radius: 4px;
+            box-shadow: var(--shadow-sm);
+        }
+        
+        .notice-bar { 
+            background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+            padding: 10px; 
+            font-size: 13px; 
+            text-align: center; 
+            color: #92400e;
+            display: none;
+            font-weight: 500;
+        }
+        
+        .back-public { 
+            font-size: 12px; 
+            text-decoration: underline; 
+            cursor: pointer; 
+            color: white; 
+            margin-right: 12px;
+            transition: opacity 0.3s;
+        }
+        
+        .back-public:hover {
+            opacity: 0.8;
+        }
+        
+        /* === 购物车项目优化 === */
+        .cart-item {
+            display: flex;
+            gap: 12px;
+            border-bottom: 1px solid #e5e7eb;
+            padding: 14px;
+            background: white;
+            border-radius: var(--radius-sm);
+            margin-bottom: 10px;
+            transition: all 0.3s ease;
+        }
+        
+        .cart-item:hover {
+            box-shadow: var(--shadow-sm);
+            transform: translateX(-4px);
+        }
+        
+        .cart-item img {
+            width: 60px;
+            height: 60px;
+            border-radius: var(--radius-sm);
+            object-fit: cover;
+        }
+        
+        .cart-item button {
+            background: linear-gradient(135deg, #f3f4f6 0%, #e5e7eb 100%);
+            border: none;
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 600;
+            color: #374151;
+        }
+        
+        .cart-item button:hover {
+            background: linear-gradient(135deg, #e5e7eb 0%, #d1d5db 100%);
+            transform: scale(1.1);
+        }
+        
+        /* === 结算区域优化 === */
+        .checkout-section {
+            padding: 24px;
+            border-top: 2px solid #f3f4f6;
+            background: white;
+        }
+        
+        .total-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 16px;
+            font-size: 1.2rem;
+            font-weight: 700;
+        }
+        
+        .total-price {
+            color: var(--red);
+            font-size: 1.5rem;
+        }
+        
+        /* === 封禁屏幕优化 === */
+        #banned-screen {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, #000000 0%, #1a1a1a 100%);
+            color: var(--red);
+            z-index: 99999;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            animation: fadeIn 0.5s ease;
+        }
+        
+        #banned-screen h1 {
+            font-size: 4rem;
+            margin: 0;
+            animation: shake 0.5s ease;
+        }
+        
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-10px); }
+            75% { transform: translateX(10px); }
+        }
+        
+        /* === 响应式优化 === */
+        @media (max-width: 768px) {
+            .sidebar {
+                width: 100%;
+                right: -100%;
+            }
+            
+            .grid {
+                grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+                gap: 16px;
+            }
+            
+            .chat-box {
+                width: calc(100vw - 40px);
+                height: 70vh;
+            }
+        }
     </style>
 </head>
 <body>
 
-    <!-- 封禁 -->
-    <div id="banned-screen" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:black; color:red; z-index:99999; flex-direction:column; justify-content:center; align-items:center; text-align:center;"><h1>🚫</h1><h2>ACCESS DENIED</h2></div>
+    <!-- 封禁屏幕 -->
+    <div id="banned-screen">
+        <h1>🚫</h1>
+        <h2>ACCESS DENIED</h2>
+    </div>
 
     <header>
         <div class="logo">🧊 Icecube Store</div>
@@ -79,26 +816,65 @@
     </header>
 
     <div class="container">
-        <h3 style="margin-top:30px">🔥 热销商品</h3>
+        <h3 style="margin-top:30px; font-size:1.5rem; font-weight:700">🔥 热销商品</h3>
         <div id="product-list" class="grid">加载中...</div>
     </div>
 
     <!-- 侧边栏 (购物车/订单/公告) -->
     <div class="sidebar-overlay" id="overlay" onclick="closeSidebar()"></div>
+    
     <div class="sidebar" id="sb-cart">
-        <div class="sb-header"><span>购物车</span><span onclick="closeSidebar()" style="cursor:pointer">✕</span></div>
+        <div class="sb-header"><span>购物车</span><span onclick="closeSidebar()">✕</span></div>
         <div class="sb-content" id="cart-list"></div>
-        <div style="padding:20px; border-top:1px solid #eee;"><div style="display:flex;justify-content:space-between;margin-bottom:10px;"><span>总计:</span><span style="color:red">¥<span id="total-price">0</span></span></div><button class="btn-black" style="width:100%" onclick="showPay()">结算</button></div>
+        <div class="checkout-section">
+            <div class="total-row">
+                <span>总计:</span>
+                <span class="total-price">¥<span id="total-price">0</span></span>
+            </div>
+            <button class="btn-black" style="width:100%; padding:14px; font-size:1rem" onclick="showPay()">立即结算</button>
+        </div>
     </div>
-    <div class="sidebar" id="sb-orders"><div class="sb-header"><span>我的订单</span><span onclick="closeSidebar()" style="cursor:pointer">✕</span></div><div class="sb-content" id="order-list"></div></div>
-    <div class="sidebar" id="sb-notices"><div class="sb-header"><span>公告</span><span onclick="closeSidebar()" style="cursor:pointer">✕</span></div><div class="sb-content" id="notice-list"></div></div>
+    
+    <div class="sidebar" id="sb-orders">
+        <div class="sb-header"><span>我的订单</span><span onclick="closeSidebar()">✕</span></div>
+        <div class="sb-content" id="order-list"></div>
+    </div>
+    
+    <div class="sidebar" id="sb-notices">
+        <div class="sb-header"><span>系统公告</span><span onclick="closeSidebar()">✕</span></div>
+        <div class="sb-content" id="notice-list"></div>
+    </div>
 
     <!-- 弹窗 -->
-    <div class="modal-overlay" id="pay-modal"><div class="modal-box"><h3>扫码支付</h3><p style="color:red;font-weight:bold">¥<span id="pay-amount">0</span></p><img id="qr-img" style="width:200px"><br><button class="btn-black" style="width:100%;margin-top:10px" onclick="confirmPaid()">✅ 我已付款</button><button class="btn" style="margin-top:10px" onclick="document.getElementById('pay-modal').style.display='none'">关闭</button></div></div>
+    <div class="modal-overlay" id="pay-modal">
+        <div class="modal-box">
+            <h3>扫码支付</h3>
+            <p style="color:var(--red); font-weight:bold; font-size:1.5rem">¥<span id="pay-amount">0</span></p>
+            <img id="qr-img" style="width:200px; border-radius:var(--radius-md)">
+            <br>
+            <button class="btn-black" style="width:100%; margin-top:16px; padding:14px" onclick="confirmPaid()">✅ 我已付款</button>
+            <button class="btn" style="margin-top:12px; background:#f3f4f6; width:100%; padding:12px" onclick="document.getElementById('pay-modal').style.display='none'">关闭</button>
+        </div>
+    </div>
     
-    <div class="modal-overlay" id="auth-modal"><div class="modal-box"><h2 id="auth-title">登录</h2><input id="u-email" class="auth-input" placeholder="邮箱"><input id="u-pass" type="password" class="auth-input" placeholder="密码"><div id="captcha-area"><div class="captcha-row"><input id="c-input" class="auth-input" placeholder="验证码"><canvas id="captcha-canvas" width="100" height="40" onclick="drawC()"></canvas></div></div><button class="btn-black" style="width:100%;margin-top:10px" onclick="submitAuth()" id="auth-btn">登录</button><div style="margin-top:10px;color:blue;cursor:pointer;text-decoration:underline" onclick="toggleAuthMode()" id="switch-txt">去注册</div><div style="margin-top:5px;color:#888;cursor:pointer" onclick="document.getElementById('auth-modal').style.display='none'">关闭</div></div></div>
+    <div class="modal-overlay" id="auth-modal">
+        <div class="modal-box">
+            <h2 id="auth-title">登录</h2>
+            <input id="u-email" class="auth-input" placeholder="邮箱">
+            <input id="u-pass" type="password" class="auth-input" placeholder="密码">
+            <div id="captcha-area">
+                <div class="captcha-row">
+                    <input id="c-input" class="auth-input" placeholder="验证码" style="flex:1">
+                    <canvas id="captcha-canvas" width="100" height="40" onclick="drawC()"></canvas>
+                </div>
+            </div>
+            <button class="btn-black" style="width:100%; margin-top:16px; padding:14px; background:linear-gradient(135deg, #667eea 0%, #764ba2 100%); color:white" onclick="submitAuth()" id="auth-btn">登录</button>
+            <div style="margin-top:16px; color:#667eea; cursor:pointer; text-decoration:underline; font-weight:600" onclick="toggleAuthMode()" id="switch-txt">去注册</div>
+            <div style="margin-top:10px; color:#888; cursor:pointer" onclick="document.getElementById('auth-modal').style.display='none'">关闭</div>
+        </div>
+    </div>
 
-    <!-- 聊天 -->
+    <!-- 聊天挂件 -->
     <div class="chat-widget">
         <div class="chat-box" id="chat-win">
             <div id="chat-header" class="chat-header">
@@ -110,7 +886,10 @@
             </div>
             <div id="chat-notice" class="notice-bar">正在私密咨询订单问题</div>
             <div class="chat-msgs" id="chat-hist"></div>
-            <div class="chat-input"><input id="chat-txt" style="flex:1" placeholder="..."><button onclick="sendMsg()" style="background:var(--primary);color:white;border:none;padding:0 10px;">发</button></div>
+            <div class="chat-input">
+                <input id="chat-txt" placeholder="输入消息...">
+                <button onclick="sendMsg()">发送</button>
+            </div>
         </div>
         <div class="chat-icon" onclick="toggleChat()">💬</div>
     </div>
@@ -124,24 +903,23 @@
         let deviceId = localStorage.getItem('did') || 'dev_'+Date.now(); localStorage.setItem('did',deviceId);
         
         // 聊天状态
-        let currentChatMode = 'public'; // public 或 private
-        let currentOrderId = null; // 私聊时的订单ID
+        let currentChatMode = 'public';
+        let currentOrderId = null;
 
         // 初始化
         checkDevice(); checkUser(); loadProducts(); updateCartUI(); setInterval(loadChat, 3000);
 
-        // === 1. 聊天逻辑 (核心升级) ===
+        // === 1. 聊天逻辑 ===
         function toggleChat() { 
             const w = document.getElementById('chat-win'); 
             w.style.display = w.style.display==='flex'?'none':'flex';
             if(w.style.display==='flex') loadChat();
         }
 
-        // 进入公共聊天
         function enterPublicChat() {
             currentChatMode = 'public';
             currentOrderId = null;
-            document.getElementById('chat-header').className = 'chat-header'; // 蓝色
+            document.getElementById('chat-header').className = 'chat-header';
             document.getElementById('chat-header').style.background = '';
             document.getElementById('chat-title').innerText = "📢 公共大厅";
             document.getElementById('chat-notice').style.display = 'none';
@@ -149,19 +927,16 @@
             loadChat();
         }
 
-        // 进入订单私聊
         function contactSupport(orderId) {
             closeSidebar();
             const w = document.getElementById('chat-win');
             w.style.display = 'flex';
             
-            // 切换状态
             currentChatMode = 'private';
             currentOrderId = orderId;
             
-            // UI 变化
-            document.getElementById('chat-header').className = 'chat-header private'; // 紫色样式
-            document.getElementById('chat-header').style.background = '#7c3aed';
+            document.getElementById('chat-header').className = 'chat-header private';
+            document.getElementById('chat-header').style.background = '';
             document.getElementById('chat-title').innerText = "🔒 订单客服";
             document.getElementById('chat-notice').style.display = 'block';
             document.getElementById('back-public').style.display = 'inline';
@@ -181,7 +956,7 @@
             
             if (currentChatMode === 'private') {
                 m.set('isPrivate', true);
-                m.set('channel', 'order_' + currentOrderId); // 频道ID
+                m.set('channel', 'order_' + currentOrderId);
                 m.set('orderId', currentOrderId);
             } else {
                 m.set('isPrivate', false);
@@ -201,15 +976,8 @@
             q.limit(50);
 
             if (currentChatMode === 'private') {
-                // 私聊模式：只看当前订单的消息
                 q.equalTo('channel', 'order_' + currentOrderId);
             } else {
-                // 公共模式：只看非私密消息 (channel为public或空)
-                const q1 = new AV.Query('ChatMessage'); q1.doesNotExist('isPrivate'); // 旧数据兼容
-                const q2 = new AV.Query('ChatMessage'); q2.equalTo('isPrivate', false);
-                const mainQ = AV.Query.or(q1, q2);
-                // 此时 q 需要被 mainQ 替换，但 LeanCloud SDK 组合查询写法略繁琐
-                // 简化处理：我们直接查 channel == public 或 null
                 q.notEqualTo('isPrivate', true); 
             }
 
@@ -230,51 +998,198 @@
             toggleSidebar('orders');
             const d = document.getElementById('order-list'); d.innerHTML="加载中...";
             const q = new AV.Query('Order'); q.equalTo('user', AV.User.current()); q.descending('createdAt');
-            const res = await q.find(); d.innerHTML = ""; if(res.length===0) d.innerHTML="无订单";
+            const res = await q.find(); d.innerHTML = ""; if(res.length===0) d.innerHTML="<p style='text-align:center; color:#888; padding:40px 0'>暂无订单</p>";
             res.forEach(o => {
                 const s = o.get('status');
-                const items = o.get('items').map(i=>`${i.name}x${i.count}`).join(', ');
+                const items = o.get('items').map(i=>`${i.name} x${i.count}`).join(', ');
                 d.innerHTML += `
                     <div class="order-card">
-                        <div class="order-head"><span>${o.createdAt.toLocaleString()}</span><span>${s==='paid'?'✅':'⏳'}</span></div>
-                        <div style="font-size:13px;margin-bottom:5px;">${items}</div>
-                        <div style="text-align:right;font-weight:bold">¥${o.get('total')}</div>
+                        <div class="order-head"><span>${o.createdAt.toLocaleString()}</span><span style="font-size:16px">${s==='paid'?'✅':'⏳'}</span></div>
+                        <div style="font-size:13px; margin-bottom:8px; color:#6b7280">${items}</div>
+                        <div style="text-align:right; font-weight:bold; font-size:1.1rem; color:var(--red)">¥${o.get('total')}</div>
                         <button class="contact-btn" onclick="contactSupport('${o.id}')">💬 联系客服 (订单私聊)</button>
                     </div>`;
             });
         }
+        
         async function showPay() {
-            const t = document.getElementById('total-price').innerText; if(t=="0")return alert("空");
+            const t = document.getElementById('total-price').innerText; if(t=="0")return alert("购物车为空");
             document.getElementById('pay-modal').style.display='flex';
             document.getElementById('pay-amount').innerText = t;
             const q=new AV.Query('GlobalConfig'); const c=await q.first(); document.getElementById('qr-img').src=c?c.get('paymentQR'):"";
         }
+        
         async function confirmPaid() {
             if(!confirm("确认已付款？")) return;
             const Order = AV.Object.extend('Order'); const o = new Order();
             o.set('user', AV.User.current()); o.set('items', cart); o.set('total', Number(document.getElementById('total-price').innerText));
             o.set('status', 'pending'); o.set('email', AV.User.current().getEmail());
-            await o.save(); cart=[]; saveCart(); document.getElementById('pay-modal').style.display='none'; closeSidebar(); alert("订单已提交，待审核"); openOrders();
+            await o.save(); cart=[]; saveCart(); document.getElementById('pay-modal').style.display='none'; closeSidebar(); alert("订单已提交，等待审核"); openOrders();
         }
 
-        // === 3. 基础功能 (用户/商品/公告) ===
-        function toggleSidebar(id) { document.querySelectorAll('.sidebar').forEach(s=>s.classList.remove('open')); document.getElementById('overlay').style.display='block'; document.getElementById('sb-'+id).classList.add('open'); }
-        function closeSidebar() { document.querySelectorAll('.sidebar').forEach(s=>s.classList.remove('open')); document.getElementById('overlay').style.display='none'; }
+        // === 3. 基础功能 ===
+        function toggleSidebar(id) { 
+            document.querySelectorAll('.sidebar').forEach(s=>s.classList.remove('open')); 
+            document.getElementById('overlay').style.display='block'; 
+            document.getElementById('sb-'+id).classList.add('open'); 
+        }
         
-        async function checkDevice() { const q=new AV.Query('DeviceBlacklist'); q.equalTo('deviceId',deviceId); if(await q.first()){document.getElementById('banned-screen').style.display='flex';AV.User.logOut();throw new Error("Banned");} }
-        function checkUser() { const u=AV.User.current(); if(u){document.getElementById('user-name').innerText=u.getUsername();document.getElementById('btn-login').style.display='none';document.getElementById('btn-logout').style.display='block';document.getElementById('btn-orders').style.display='block';} }
+        function closeSidebar() { 
+            document.querySelectorAll('.sidebar').forEach(s=>s.classList.remove('open')); 
+            document.getElementById('overlay').style.display='none'; 
+        }
+        
+        async function checkDevice() { 
+            const q=new AV.Query('DeviceBlacklist'); 
+            q.equalTo('deviceId',deviceId); 
+            if(await q.first()){
+                document.getElementById('banned-screen').style.display='flex';
+                AV.User.logOut();
+                throw new Error("Banned");
+            } 
+        }
+        
+        function checkUser() { 
+            const u=AV.User.current(); 
+            if(u){
+                document.getElementById('user-name').innerText=u.getUsername();
+                document.getElementById('btn-login').style.display='none';
+                document.getElementById('btn-logout').style.display='block';
+                document.getElementById('btn-orders').style.display='block';
+            } 
+        }
+        
         function logout() { AV.User.logOut(); location.reload(); }
         function openAuth() { document.getElementById('auth-modal').style.display='flex'; }
-        function toggleAuthMode() { isReg=!isReg; document.getElementById('auth-title').innerText=isReg?"注册":"登录"; document.getElementById('auth-btn').innerText=isReg?"注册":"登录"; document.getElementById('switch-txt').innerText=isReg?"返回登录":"去注册"; document.getElementById('captcha-area').style.display=isReg?'block':'none'; if(isReg)drawC(); }
-        function drawC() { const ctx=document.getElementById('captcha-canvas').getContext('2d'); ctx.fillStyle='#eee'; ctx.fillRect(0,0,100,40); const s='ABCDEFGHJKLMNPQRSTUVWXYZ23456789'; realC=''; for(let i=0;i<4;i++)realC+=s[Math.floor(Math.random()*s.length)]; ctx.fillStyle='#333'; ctx.font='20px Arial'; ctx.fillText(realC,25,28); }
-        async function submitAuth() { const e=document.getElementById('u-email').value, p=document.getElementById('u-pass').value; try{ if(isReg){ if(document.getElementById('c-input').value.toUpperCase()!==realC)return alert("验证码错"); const u=new AV.User();u.setUsername(e);u.setPassword(p);u.setEmail(e);await u.signUp();alert("注册成功，请激活");toggleAuthMode(); }else{ await AV.User.logIn(e,p); const q=new AV.Query('Blacklist');q.equalTo('email',e);if(await q.count()>0){alert("已封禁");AV.User.logOut();return;} location.reload(); } }catch(err){alert(err.message);if(isReg)drawC();} }
         
-        async function loadProducts() { const q=new AV.Query('Product'); q.descending('createdAt'); const res=await q.find(); document.getElementById('product-list').innerHTML=res.map(p=>`<div class="card"><img src="${p.get('image')}"><div class="info"><div class="title">${p.get('name')}</div><div class="price">¥${p.get('price')}</div><button class="btn-add" onclick='addToCart({id:"${p.id}",name:"${p.get('name')}",price:${p.get('price')},image:"${p.get('image')}"})'>+ 购物车</button></div></div>`).join(''); }
-        function addToCart(item) { if(!AV.User.current())return openAuth(); const ex=cart.find(x=>x.id===item.id); if(ex)ex.count++; else cart.push({...item,count:1}); saveCart(); toggleSidebar('cart'); }
-        function saveCart() { localStorage.setItem('myCart', JSON.stringify(cart)); updateCartUI(); }
-        function updateCartUI() { document.getElementById('cart-count').innerText=cart.reduce((a,b)=>a+b.count,0); const l=document.getElementById('cart-list'); l.innerHTML=""; let t=0; cart.forEach((i,idx)=>{t+=i.price*i.count; l.innerHTML+=`<div style="display:flex;gap:10px;border-bottom:1px solid #eee;padding:10px"><img src="${i.image}" style="width:50px;height:50px"><div style="flex:1">${i.name}<br>¥${i.price}</div><button onclick="chQ(${idx},-1)">-</button>${i.count}<button onclick="chQ(${idx},1)">+</button></div>`}); document.getElementById('total-price').innerText=t; }
-        function chQ(i,d){cart[i].count+=d;if(cart[i].count<=0)cart.splice(i,1);saveCart();}
-        async function openNotices(){ toggleSidebar('notices'); const q=new AV.Query('Announcement'); q.descending('createdAt'); const res=await q.find(); document.getElementById('notice-list').innerHTML=res.map(n=>`<div style="padding:10px;border-bottom:1px solid #eee;background:#fff3cd;margin-bottom:5px">${n.get('content')}<div style="font-size:12px;color:#888">${n.createdAt.toLocaleString()}</div></div>`).join(''); }
+        function toggleAuthMode() { 
+            isReg=!isReg; 
+            document.getElementById('auth-title').innerText=isReg?"注册":"登录"; 
+            document.getElementById('auth-btn').innerText=isReg?"注册":"登录"; 
+            document.getElementById('switch-txt').innerText=isReg?"返回登录":"去注册"; 
+            document.getElementById('captcha-area').style.display=isReg?'block':'none'; 
+            if(isReg)drawC(); 
+        }
+        
+        function drawC() { 
+            const ctx=document.getElementById('captcha-canvas').getContext('2d'); 
+            ctx.fillStyle='#f3f4f6'; 
+            ctx.fillRect(0,0,100,40); 
+            const s='ABCDEFGHJKLMNPQRSTUVWXYZ23456789'; 
+            realC=''; 
+            for(let i=0;i<4;i++)realC+=s[Math.floor(Math.random()*s.length)]; 
+            ctx.fillStyle='#374151'; 
+            ctx.font='bold 20px Arial'; 
+            ctx.fillText(realC,25,28); 
+        }
+        
+        async function submitAuth() { 
+            const e=document.getElementById('u-email').value, p=document.getElementById('u-pass').value; 
+            try{ 
+                if(isReg){ 
+                    if(document.getElementById('c-input').value.toUpperCase()!==realC)return alert("验证码错误");
+                    const u=new AV.User();
+                    u.setUsername(e);
+                    u.setPassword(p);
+                    u.setEmail(e);
+                    await u.signUp();
+                    alert("注册成功，请激活邮箱");
+                    toggleAuthMode(); 
+                }else{ 
+                    await AV.User.logIn(e,p); 
+                    const q=new AV.Query('Blacklist');
+                    q.equalTo('email',e);
+                    if(await q.count()>0){
+                        alert("账号已被封禁");
+                        AV.User.logOut();
+                        return;
+                    } 
+                    location.reload(); 
+                } 
+            }catch(err){
+                alert(err.message);
+                if(isReg)drawC();
+            } 
+        }
+        
+        async function loadProducts() { 
+            const q=new AV.Query('Product'); 
+            q.descending('createdAt'); 
+            const res=await q.find(); 
+            document.getElementById('product-list').innerHTML=res.map(p=>`
+                <div class="card">
+                    <img src="${p.get('image')}">
+                    <div class="info">
+                        <div class="title">${p.get('name')}</div>
+                        <div class="price">¥${p.get('price')}</div>
+                        <button class="btn-add" onclick='addToCart({id:"${p.id}",name:"${p.get('name')}",price:${p.get('price')},image:"${p.get('image')}"})'>+ 加入购物车</button>
+                    </div>
+                </div>
+            `).join(''); 
+        }
+        
+        function addToCart(item) { 
+            if(!AV.User.current())return openAuth(); 
+            const ex=cart.find(x=>x.id===item.id); 
+            if(ex)ex.count++; 
+            else cart.push({...item,count:1}); 
+            saveCart(); 
+            toggleSidebar('cart'); 
+        }
+        
+        function saveCart() { 
+            localStorage.setItem('myCart', JSON.stringify(cart)); 
+            updateCartUI(); 
+        }
+        
+        function updateCartUI() { 
+            document.getElementById('cart-count').innerText=cart.reduce((a,b)=>a+b.count,0); 
+            const l=document.getElementById('cart-list'); 
+            l.innerHTML=""; 
+            let t=0; 
+            cart.forEach((i,idx)=>{
+                t+=i.price*i.count; 
+                l.innerHTML+=`
+                    <div class="cart-item">
+                        <img src="${i.image}">
+                        <div style="flex:1">
+                            <div style="font-weight:600; margin-bottom:4px">${i.name}</div>
+                            <div style="color:var(--red); font-weight:700">¥${i.price}</div>
+                        </div>
+                        <div style="display:flex; align-items:center; gap:8px">
+                            <button onclick="chQ(${idx},-1)">-</button>
+                            <span style="min-width:20px; text-align:center; font-weight:600">${i.count}</span>
+                            <button onclick="chQ(${idx},1)">+</button>
+                        </div>
+                    </div>
+                `
+            }); 
+            document.getElementById('total-price').innerText=t; 
+        }
+        
+        function chQ(i,d){
+            cart[i].count+=d;
+            if(cart[i].count<=0)cart.splice(i,1);
+            saveCart();
+        }
+        
+        async function openNotices(){ 
+            toggleSidebar('notices'); 
+            const q=new AV.Query('Announcement'); 
+            q.descending('createdAt'); 
+            const res=await q.find(); 
+            document.getElementById('notice-list').innerHTML=res.map(n=>`
+                <div style="padding:16px; border-bottom:1px solid #e5e7eb; background:linear-gradient(135deg, #fef3c7 0%, #fde68a 100%); margin-bottom:12px; border-radius:var(--radius-md); box-shadow:var(--shadow-sm)">
+                    <div style="font-weight:600; margin-bottom:4px">${n.get('content')}</div>
+                    <div style="font-size:12px; color:#92400e">${n.createdAt.toLocaleString()}</div>
+                </div>
+            `).join(''); 
+        }
+        
+        // 回车发送消息
+        document.getElementById('chat-txt').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') sendMsg();
+        });
     </script>
 </body>
 </html>

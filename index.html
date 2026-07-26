@@ -3,92 +3,117 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>泺| 官方旗舰店</title>
+    <title>艺卓| 官方旗舰店</title>
     <script src="https://cdn.jsdelivr.net/npm/leancloud-storage@4.12.0/dist/av-min.js"></script>
     <script src="https://accounts.google.com/gsi/client" async defer></script>
     <style>
         /* === 优化后的样式区 === */
-        :root { 
-            --primary: #2563eb; 
-            --primary-dark: #1d4ed8;
-            --bg: #f8fafc; 
-            --text: #1f2937; 
-            --red: #ef4444; 
+        :root {
+            --primary: #6366f1;
+            --primary-dark: #4f46e5;
+            --brand-1: #667eea;
+            --brand-2: #764ba2;
+            --brand: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            --brand-soft: linear-gradient(135deg, #7c86f0 0%, #8b5caf 100%);
+            --bg: #eef0f8;
+            --surface: #ffffff;
+            --text: #1e2233;
+            --text-soft: #6b7280;
+            --border: #eceef5;
+            --red: #ef4444;
             --red-dark: #dc2626;
-            --green: #10b981; 
+            --green: #10b981;
             --purple: #8b5cf6;
             --purple-dark: #7c3aed;
-            --shadow-sm: 0 1px 3px rgba(0,0,0,0.08);
-            --shadow-md: 0 4px 12px rgba(0,0,0,0.1);
-            --shadow-lg: 0 10px 30px rgba(0,0,0,0.15);
-            --radius-sm: 8px;
-            --radius-md: 12px;
-            --radius-lg: 16px;
+            --amber-1: #fff7e0;
+            --amber-2: #ffe9b0;
+            --shadow-sm: 0 1px 2px rgba(16,24,40,.06), 0 1px 3px rgba(16,24,40,.05);
+            --shadow-md: 0 8px 24px -6px rgba(16,24,40,.14);
+            --shadow-lg: 0 28px 56px -14px rgba(16,24,40,.28);
+            --shadow-brand: 0 12px 30px -8px rgba(102,126,234,.55);
+            --radius-sm: 10px;
+            --radius-md: 14px;
+            --radius-lg: 20px;
         }
-        
+
         * { box-sizing: border-box; }
-        
-        body { 
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB', sans-serif; 
-            background: var(--bg); 
-            margin: 0; 
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB', sans-serif;
+            background: var(--bg);
+            background-image:
+                radial-gradient(1100px 560px at 100% -10%, rgba(118,75,162,.14), transparent 60%),
+                radial-gradient(950px 520px at -10% 2%, rgba(102,126,234,.14), transparent 55%);
+            background-attachment: fixed;
+            margin: 0;
             color: var(--text);
             line-height: 1.6;
+            -webkit-font-smoothing: antialiased;
+            text-rendering: optimizeLegibility;
         }
-        
+
         /* === Header 优化 === */
-        header { 
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            padding: 16px 24px; 
-            position: sticky; 
-            top: 0; 
-            z-index: 100; 
-            box-shadow: var(--shadow-md);
-            display: flex; 
-            justify-content: space-between; 
+        header {
+            background: linear-gradient(135deg, rgba(102,126,234,.94) 0%, rgba(118,75,162,.94) 100%);
+            padding: 15px 28px;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            box-shadow: 0 10px 30px -12px rgba(76,29,149,.6);
+            display: flex;
+            justify-content: space-between;
             align-items: center;
-            backdrop-filter: blur(10px);
+            backdrop-filter: saturate(160%) blur(14px);
+            -webkit-backdrop-filter: saturate(160%) blur(14px);
+            border-bottom: 1px solid rgba(255,255,255,.16);
             animation: slideDown 0.5s ease-out;
         }
-        
+
         @keyframes slideDown {
             from { transform: translateY(-100%); opacity: 0; }
             to { transform: translateY(0); opacity: 1; }
         }
-        
-        .logo { 
-            font-size: 1.6rem; 
-            font-weight: 800; 
+
+        .logo {
+            font-size: 1.55rem;
+            font-weight: 800;
+            letter-spacing: .5px;
             color: white;
-            text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+            text-shadow: 0 2px 10px rgba(0,0,0,0.22);
             display: flex;
             align-items: center;
             gap: 8px;
             transition: transform 0.3s ease;
         }
-        
+
+        .logo::before {
+            content: "◆";
+            font-size: 1.05rem;
+            color: rgba(255,255,255,.85);
+        }
+
         .logo:hover {
-            transform: scale(1.05);
+            transform: scale(1.04);
         }
-        
-        .nav-right { 
-            display: flex; 
-            align-items: center; 
-            gap: 12px; 
+
+        .nav-right {
+            display: flex;
+            align-items: center;
+            gap: 10px;
         }
-        
-        .btn { 
-            padding: 10px 18px; 
-            border-radius: 24px; 
-            cursor: pointer; 
-            border: none; 
-            font-size: 0.9rem; 
+
+        .btn {
+            padding: 10px 18px;
+            border-radius: 24px;
+            cursor: pointer;
+            border: none;
+            font-size: 0.9rem;
             transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            font-weight: 500;
+            font-weight: 600;
             position: relative;
             overflow: hidden;
         }
-        
+
         .btn::before {
             content: '';
             position: absolute;
@@ -101,114 +126,151 @@
             transform: translate(-50%, -50%);
             transition: width 0.5s, height 0.5s;
         }
-        
+
         .btn:hover::before {
-            width: 300px;
-            height: 300px;
+            width: 320px;
+            height: 320px;
         }
-        
+
         .btn:active {
             transform: scale(0.95);
         }
-        
+
         .btn-icon {
-            background: rgba(255,255,255,0.2);
+            background: rgba(255,255,255,0.16);
             color: white;
-            width: 40px;
-            height: 40px;
+            width: 42px;
+            height: 42px;
             padding: 0;
             display: flex;
             align-items: center;
             justify-content: center;
             font-size: 1.2rem;
+            border: 1px solid rgba(255,255,255,.22);
             backdrop-filter: blur(10px);
         }
-        
+
         .btn-icon:hover {
             background: rgba(255,255,255,0.3);
-            transform: scale(1.1);
+            transform: scale(1.1) rotate(-6deg);
         }
-        
-        .btn-black { 
-            background: rgba(255,255,255,0.95); 
-            color: #667eea;
+
+        .btn-black {
+            background: rgba(255,255,255,0.96);
+            color: #5b4bce;
             box-shadow: var(--shadow-sm);
         }
-        
+
         .btn-black:hover {
             background: white;
             box-shadow: var(--shadow-md);
             transform: translateY(-2px);
         }
-        
-        .btn-red { 
-            background: var(--red); 
-            color: white; 
+
+        .btn-red {
+            background: var(--red);
+            color: white;
             display: none;
             box-shadow: var(--shadow-sm);
         }
-        
+
         .btn-red:hover {
             background: var(--red-dark);
-            box-shadow: var(--shadow-md);
+            box-shadow: 0 8px 20px -6px rgba(239,68,68,.6);
         }
-        
-        .btn-cart { 
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white; 
-            display: flex; 
-            align-items: center; 
+
+        .btn-cart {
+            background: rgba(255,255,255,0.14);
+            color: white;
+            display: flex;
+            align-items: center;
             gap: 6px;
-            box-shadow: var(--shadow-md);
-            border: 2px solid rgba(255,255,255,0.3);
+            box-shadow: var(--shadow-sm);
+            border: 1px solid rgba(255,255,255,0.32);
+            backdrop-filter: blur(10px);
         }
-        
+
+        .btn-cart #cart-count {
+            background: white;
+            color: #6b53d6;
+            min-width: 20px;
+            height: 20px;
+            padding: 0 6px;
+            border-radius: 999px;
+            font-size: .75rem;
+            font-weight: 800;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+        }
+
         .btn-cart:hover {
             transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+            background: rgba(255,255,255,0.24);
+            box-shadow: 0 8px 22px -6px rgba(0,0,0,.35);
         }
-        
+
         #user-name {
-            font-size: 14px; 
-            font-weight: 600; 
+            font-size: 14px;
+            font-weight: 600;
             color: white;
-            background: rgba(255,255,255,0.2);
+            background: rgba(255,255,255,0.16);
             padding: 8px 16px;
             border-radius: 20px;
+            border: 1px solid rgba(255,255,255,.22);
             backdrop-filter: blur(10px);
         }
 
         /* === Container 优化 === */
-        .container { 
-            max-width: 1200px; 
-            margin: 30px auto; 
+        .container {
+            max-width: 1200px;
+            margin: 34px auto;
             padding: 0 24px;
             animation: fadeIn 0.6s ease-out;
         }
-        
+
         @keyframes fadeIn {
             from { opacity: 0; transform: translateY(20px); }
             to { opacity: 1; transform: translateY(0); }
         }
-        
-        .grid { 
-            display: grid; 
-            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); 
-            gap: 24px;
-            margin-top: 20px;
+
+        .container > h3 {
+            position: relative;
+            padding-left: 16px;
+            letter-spacing: .3px;
         }
-        
+
+        .container > h3::before {
+            content: "";
+            position: absolute;
+            left: 0;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 6px;
+            height: 1.35rem;
+            border-radius: 999px;
+            background: var(--brand);
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 24px;
+            margin-top: 22px;
+        }
+
         /* === Card 优化 === */
-        .card { 
-            background: white; 
-            border-radius: var(--radius-lg); 
-            overflow: hidden; 
+        .card {
+            background: var(--surface);
+            border-radius: var(--radius-lg);
+            overflow: hidden;
             box-shadow: var(--shadow-sm);
+            border: 1px solid var(--border);
             transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
             cursor: pointer;
             position: relative;
         }
-        
+
         .card::before {
             content: '';
             position: absolute;
@@ -216,537 +278,574 @@
             left: 0;
             right: 0;
             bottom: 0;
-            background: linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.1) 100%);
+            background: linear-gradient(135deg, rgba(102, 126, 234, 0.08) 0%, rgba(118, 75, 162, 0.08) 100%);
             opacity: 0;
             transition: opacity 0.4s;
             z-index: 1;
+            pointer-events: none;
         }
-        
+
         .card:hover {
             transform: translateY(-8px);
             box-shadow: var(--shadow-lg);
+            border-color: rgba(118,75,162,.25);
         }
-        
+
         .card:hover::before {
             opacity: 1;
         }
-        
-        .card img { 
-            width: 100%; 
-            height: 220px; 
+
+        .card img {
+            width: 100%;
+            height: 220px;
             object-fit: cover;
-            transition: transform 0.4s ease;
+            background: #f1f2f8;
+            transition: transform 0.5s ease;
         }
-        
+
         .card:hover img {
-            transform: scale(1.1);
+            transform: scale(1.08);
         }
-        
-        .info { 
+
+        .info {
             padding: 18px;
             position: relative;
             z-index: 2;
         }
-        
-        .title { 
-            font-weight: 600; 
-            margin-bottom: 8px; 
-            height: 24px; 
+
+        .title {
+            font-weight: 600;
+            margin-bottom: 8px;
+            height: 24px;
             overflow: hidden;
             font-size: 1.05rem;
-            color: #1f2937;
+            color: var(--text);
         }
-        
-        .price { 
-            color: var(--red); 
-            font-size: 1.4rem; 
-            font-weight: 700;
+
+        .price {
+            color: var(--red);
+            font-size: 1.4rem;
+            font-weight: 800;
+            letter-spacing: -.3px;
             margin-bottom: 12px;
         }
-        
-        .btn-add { 
-            width: 100%; 
-            padding: 12px; 
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white; 
-            border: none; 
-            border-radius: var(--radius-sm); 
-            cursor: pointer; 
+
+        .btn-add {
+            width: 100%;
+            padding: 12px;
+            background: var(--brand);
+            background-size: 160% 160%;
+            color: white;
+            border: none;
+            border-radius: var(--radius-sm);
+            cursor: pointer;
             margin-top: 10px;
-            font-weight: 600;
+            font-weight: 700;
+            letter-spacing: .3px;
             transition: all 0.3s ease;
-            box-shadow: var(--shadow-sm);
+            box-shadow: 0 6px 16px -8px rgba(102,126,234,.7);
         }
-        
+
         .btn-add:hover {
             transform: translateY(-2px);
-            box-shadow: 0 6px 16px rgba(102, 126, 234, 0.4);
+            background-position: right center;
+            box-shadow: var(--shadow-brand);
         }
-        
+
         .btn-add:active {
             transform: scale(0.98);
         }
 
         /* === 侧边栏优化 === */
-        .sidebar-overlay { 
-            position: fixed; 
-            top: 0; 
-            left: 0; 
-            width: 100%; 
-            height: 100%; 
-            background: rgba(0,0,0,0.6); 
-            z-index: 999; 
+        .sidebar-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(15,20,40,0.55);
+            z-index: 999;
             display: none;
-            backdrop-filter: blur(4px);
+            backdrop-filter: blur(5px);
             animation: fadeInOverlay 0.3s ease;
         }
-        
+
         @keyframes fadeInOverlay {
             from { opacity: 0; }
             to { opacity: 1; }
         }
-        
-        .sidebar { 
-            position: fixed; 
-            top: 0; 
-            right: -450px; 
-            width: 420px; 
-            height: 100vh; 
-            background: white; 
-            z-index: 1000; 
-            transition: right 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-            display: flex; 
-            flex-direction: column; 
-            box-shadow: -10px 0 30px rgba(0,0,0,0.2);
+
+        .sidebar {
+            position: fixed;
+            top: 0;
+            right: -460px;
+            width: 420px;
+            max-width: 100%;
+            height: 100vh;
+            background: var(--bg);
+            z-index: 1000;
+            transition: right 0.42s cubic-bezier(0.22, 1, 0.36, 1);
+            display: flex;
+            flex-direction: column;
+            box-shadow: -18px 0 48px -16px rgba(15,20,40,0.4);
         }
-        
-        .sidebar.open { 
-            right: 0; 
+
+        .sidebar.open {
+            right: 0;
         }
-        
-        .sb-header { 
-            padding: 24px; 
-            border-bottom: 2px solid #f3f4f6; 
-            font-weight: 700; 
-            display: flex; 
+
+        .sb-header {
+            padding: 22px 24px;
+            border-bottom: 1px solid var(--border);
+            font-weight: 700;
+            display: flex;
             justify-content: space-between;
-            font-size: 1.2rem;
-            background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+            align-items: center;
+            font-size: 1.18rem;
+            color: var(--text);
+            background: var(--surface);
         }
-        
+
         .sb-header span:last-child {
             cursor: pointer;
-            width: 32px;
-            height: 32px;
+            width: 34px;
+            height: 34px;
             display: flex;
             align-items: center;
             justify-content: center;
             border-radius: 50%;
+            font-size: .95rem;
+            color: var(--text-soft);
             transition: all 0.3s;
-            background: rgba(0,0,0,0.05);
+            background: rgba(15,20,40,0.05);
         }
-        
+
         .sb-header span:last-child:hover {
-            background: rgba(0,0,0,0.1);
+            background: rgba(239,68,68,.12);
+            color: var(--red);
             transform: rotate(90deg);
         }
-        
-        .sb-content { 
-            flex: 1; 
-            overflow-y: auto; 
-            padding: 20px; 
-            background: #f8fafc;
+
+        .sb-content {
+            flex: 1;
+            overflow-y: auto;
+            padding: 20px;
+            background: var(--bg);
         }
-        
+
         .sb-content::-webkit-scrollbar {
             width: 8px;
         }
-        
+
         .sb-content::-webkit-scrollbar-track {
-            background: #f1f5f9;
+            background: transparent;
         }
-        
+
         .sb-content::-webkit-scrollbar-thumb {
-            background: #cbd5e1;
-            border-radius: 4px;
+            background: #cdd2e6;
+            border-radius: 999px;
         }
-        
+
         .sb-content::-webkit-scrollbar-thumb:hover {
-            background: #94a3b8;
+            background: #aeb5d6;
         }
-        
+
         /* === 订单卡片优化 === */
-        .order-card { 
-            background: white; 
-            padding: 18px; 
-            border-radius: var(--radius-md); 
-            margin-bottom: 16px; 
-            border: 1px solid #e5e7eb;
+        .order-card {
+            background: var(--surface);
+            padding: 18px;
+            border-radius: var(--radius-md);
+            margin-bottom: 16px;
+            border: 1px solid var(--border);
             transition: all 0.3s ease;
             box-shadow: var(--shadow-sm);
         }
-        
+
         .order-card:hover {
             box-shadow: var(--shadow-md);
             transform: translateX(-4px);
+            border-color: rgba(118,75,162,.22);
         }
-        
-        .order-head { 
-            display: flex; 
-            justify-content: space-between; 
-            font-size: 12px; 
-            color: #6b7280; 
-            margin-bottom: 12px; 
-            border-bottom: 1px dashed #e5e7eb; 
-            padding-bottom: 8px; 
+
+        .order-head {
+            display: flex;
+            justify-content: space-between;
+            font-size: 12px;
+            color: var(--text-soft);
+            margin-bottom: 12px;
+            border-bottom: 1px dashed #e5e7eb;
+            padding-bottom: 8px;
         }
-        
-        .contact-btn { 
+
+        .contact-btn {
             background: linear-gradient(135deg, var(--primary) 0%, var(--purple) 100%);
             border: none;
             color: white;
-            padding: 10px 16px; 
-            border-radius: var(--radius-sm); 
-            font-size: 13px; 
-            cursor: pointer; 
-            margin-top: 12px; 
+            padding: 11px 16px;
+            border-radius: var(--radius-sm);
+            font-size: 13px;
+            cursor: pointer;
+            margin-top: 12px;
             width: 100%;
             font-weight: 600;
             transition: all 0.3s ease;
-            box-shadow: var(--shadow-sm);
+            box-shadow: 0 6px 16px -8px rgba(139,92,246,.7);
         }
-        
+
         .contact-btn:hover {
             transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(139, 92, 246, 0.4);
+            box-shadow: 0 10px 22px -8px rgba(139, 92, 246, 0.7);
         }
-        
+
         /* === 弹窗优化 === */
-        .modal-overlay { 
-            position: fixed; 
-            top: 0; 
-            left: 0; 
-            width: 100%; 
-            height: 100%; 
-            background: rgba(0,0,0,0.7); 
-            z-index: 2000; 
-            display: none; 
-            justify-content: center; 
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(15,20,40,0.62);
+            z-index: 2000;
+            display: none;
+            justify-content: center;
             align-items: center;
-            backdrop-filter: blur(6px);
+            backdrop-filter: blur(8px);
             animation: fadeInOverlay 0.3s ease;
         }
-        
-        .modal-box { 
-            background: white; 
-            padding: 36px; 
-            border-radius: var(--radius-lg); 
-            width: 360px; 
+
+        .modal-box {
+            background: var(--surface);
+            padding: 36px;
+            border-radius: var(--radius-lg);
+            width: 360px;
+            max-width: calc(100vw - 40px);
             text-align: center;
             box-shadow: var(--shadow-lg);
+            border: 1px solid rgba(255,255,255,.6);
             animation: modalSlideUp 0.4s cubic-bezier(0.4, 0, 0.2, 1);
         }
-        
+
         @keyframes modalSlideUp {
-            from { transform: translateY(50px); opacity: 0; }
-            to { transform: translateY(0); opacity: 1; }
+            from { transform: translateY(50px) scale(.98); opacity: 0; }
+            to { transform: translateY(0) scale(1); opacity: 1; }
         }
-        
+
         .modal-box h2, .modal-box h3 {
             margin-top: 0;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            font-weight: 800;
+            letter-spacing: .2px;
+            background: var(--brand);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             background-clip: text;
         }
-        
-        .auth-input { 
-            width: 100%; 
-            padding: 14px; 
-            margin: 10px 0; 
-            border: 2px solid #e5e7eb; 
-            border-radius: var(--radius-sm); 
+
+        .auth-input {
+            width: 100%;
+            padding: 14px;
+            margin: 10px 0;
+            border: 2px solid var(--border);
+            border-radius: var(--radius-sm);
             box-sizing: border-box;
+            background: #f8f9fd;
             transition: all 0.3s ease;
             font-size: 0.95rem;
         }
-        
+
         .auth-input:focus {
             outline: none;
+            background: #fff;
             border-color: var(--primary);
-            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+            box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.14);
         }
-        
-        #captcha-area { 
-            display: none; 
+
+        #captcha-area {
+            display: none;
         }
-        
-        .captcha-row { 
-            display: flex; 
-            gap: 8px; 
-            align-items: center; 
-            margin: 10px 0; 
+
+        .captcha-row {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+            margin: 10px 0;
         }
-        
-        #captcha-canvas { 
-            border: 2px solid #e5e7eb; 
+
+        #captcha-canvas {
+            border: 2px solid var(--border);
             cursor: pointer;
             border-radius: var(--radius-sm);
             transition: all 0.3s ease;
         }
-        
+
         #captcha-canvas:hover {
             border-color: var(--primary);
             box-shadow: var(--shadow-sm);
         }
 
         /* === 聊天挂件优化 === */
-        .chat-widget { 
-            position: fixed; 
-            bottom: 24px; 
-            right: 24px; 
-            z-index: 900; 
+        .chat-widget {
+            position: fixed;
+            bottom: 24px;
+            right: 24px;
+            z-index: 900;
         }
-        
-        .chat-icon { 
-            width: 64px; 
-            height: 64px; 
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            border-radius: 50%; 
-            color: white; 
-            display: flex; 
-            justify-content: center; 
-            align-items: center; 
-            font-size: 32px; 
-            cursor: pointer; 
-            box-shadow: 0 8px 24px rgba(102, 126, 234, 0.5);
+
+        .chat-icon {
+            width: 64px;
+            height: 64px;
+            background: var(--brand);
+            border-radius: 50%;
+            color: white;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 30px;
+            cursor: pointer;
+            box-shadow: var(--shadow-brand);
             transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            animation: pulse 2s infinite;
+            animation: pulse 2.4s infinite;
         }
-        
+
         @keyframes pulse {
-            0%, 100% { transform: scale(1); }
-            50% { transform: scale(1.05); }
+            0%, 100% { box-shadow: 0 12px 30px -8px rgba(102,126,234,.55), 0 0 0 0 rgba(102,126,234,.35); }
+            50% { box-shadow: 0 12px 30px -8px rgba(102,126,234,.55), 0 0 0 14px rgba(102,126,234,0); }
         }
-        
+
         .chat-icon:hover {
-            transform: scale(1.1);
-            box-shadow: 0 12px 32px rgba(102, 126, 234, 0.6);
+            transform: scale(1.1) rotate(6deg);
+            box-shadow: 0 16px 38px -8px rgba(102, 126, 234, 0.7);
         }
-        
-        .chat-box { 
-            position: absolute; 
-            bottom: 84px; 
-            right: 0; 
-            width: 360px; 
-            height: 500px; 
-            background: white; 
-            border-radius: var(--radius-lg); 
+
+        .chat-box {
+            position: absolute;
+            bottom: 84px;
+            right: 0;
+            width: 360px;
+            height: 500px;
+            background: var(--surface);
+            border-radius: var(--radius-lg);
             box-shadow: var(--shadow-lg);
-            display: none; 
-            flex-direction: column; 
+            border: 1px solid var(--border);
+            display: none;
+            flex-direction: column;
             overflow: hidden;
             animation: chatSlideUp 0.4s cubic-bezier(0.4, 0, 0.2, 1);
         }
-        
+
         @keyframes chatSlideUp {
-            from { transform: translateY(20px); opacity: 0; }
-            to { transform: translateY(0); opacity: 1; }
+            from { transform: translateY(20px) scale(.98); opacity: 0; }
+            to { transform: translateY(0) scale(1); opacity: 1; }
         }
-        
-        .chat-header { 
+
+        .chat-header {
             background: linear-gradient(135deg, var(--primary) 0%, var(--purple) 100%);
-            color: white; 
-            padding: 16px; 
-            font-weight: 700; 
-            display: flex; 
-            justify-content: space-between; 
+            color: white;
+            padding: 16px;
+            font-weight: 700;
+            display: flex;
+            justify-content: space-between;
             align-items: center;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            box-shadow: 0 4px 14px -6px rgba(0,0,0,0.3);
         }
-        
-        .chat-header.private { 
+
+        .chat-header.private {
             background: linear-gradient(135deg, var(--purple) 0%, var(--purple-dark) 100%);
         }
-        
-        .chat-msgs { 
-            flex: 1; 
-            padding: 16px; 
-            overflow-y: auto; 
-            background: linear-gradient(to bottom, #f8fafc 0%, #ffffff 100%);
-            display: flex; 
-            flex-direction: column; 
-            gap: 10px; 
+
+        .chat-msgs {
+            flex: 1;
+            padding: 16px;
+            overflow-y: auto;
+            background: linear-gradient(to bottom, #f6f7fc 0%, #ffffff 100%);
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
         }
-        
+
         .chat-msgs::-webkit-scrollbar {
             width: 6px;
         }
-        
+
         .chat-msgs::-webkit-scrollbar-track {
             background: transparent;
         }
-        
+
         .chat-msgs::-webkit-scrollbar-thumb {
-            background: #cbd5e1;
-            border-radius: 3px;
+            background: #cdd2e6;
+            border-radius: 999px;
         }
-        
-        .chat-input { 
-            padding: 16px; 
-            border-top: 2px solid #f3f4f6; 
-            display: flex; 
+
+        .chat-input {
+            padding: 14px 16px;
+            border-top: 1px solid var(--border);
+            display: flex;
             gap: 8px;
-            background: white;
+            background: var(--surface);
         }
-        
+
         .chat-input input {
             flex: 1;
-            padding: 12px;
-            border: 2px solid #e5e7eb;
+            padding: 12px 16px;
+            border: 2px solid var(--border);
             border-radius: 24px;
+            background: #f8f9fd;
             font-size: 0.9rem;
             transition: all 0.3s ease;
         }
-        
+
         .chat-input input:focus {
             outline: none;
+            background: #fff;
             border-color: var(--primary);
-            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+            box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.14);
         }
-        
+
         .chat-input button {
             background: linear-gradient(135deg, var(--primary) 0%, var(--purple) 100%);
             color: white;
             border: none;
-            padding: 0 24px;
+            padding: 0 22px;
             border-radius: 24px;
-            font-weight: 600;
+            font-weight: 700;
             cursor: pointer;
             transition: all 0.3s ease;
-            box-shadow: var(--shadow-sm);
+            box-shadow: 0 6px 16px -8px rgba(99,102,241,.7);
         }
-        
+
         .chat-input button:hover {
             transform: scale(1.05);
             box-shadow: var(--shadow-md);
         }
-        
-        .msg { 
-            padding: 10px 14px; 
-            border-radius: 16px; 
-            max-width: 80%; 
-            font-size: 0.9rem; 
+
+        .msg {
+            padding: 10px 14px;
+            border-radius: 16px;
+            max-width: 80%;
+            font-size: 0.9rem;
             word-wrap: break-word;
             animation: messageSlide 0.3s ease;
             line-height: 1.5;
         }
-        
+
         @keyframes messageSlide {
             from { opacity: 0; transform: translateY(10px); }
             to { opacity: 1; transform: translateY(0); }
         }
-        
-        .msg-me { 
-            background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%);
-            align-self: flex-end; 
-            color: #1e40af;
+
+        .msg-me {
+            background: var(--brand);
+            align-self: flex-end;
+            color: #fff;
             border-bottom-right-radius: 4px;
-            box-shadow: var(--shadow-sm);
+            box-shadow: 0 4px 12px -6px rgba(102,126,234,.7);
         }
-        
-        .msg-other { 
-            background: white;
-            border: 1px solid #e5e7eb; 
+
+        .msg-other {
+            background: #fff;
+            border: 1px solid var(--border);
             align-self: flex-start;
+            color: var(--text);
             border-bottom-left-radius: 4px;
             box-shadow: var(--shadow-sm);
         }
-        
-        .notice-bar { 
-            background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
-            padding: 10px; 
-            font-size: 13px; 
-            text-align: center; 
+
+        .notice-bar {
+            background: linear-gradient(135deg, var(--amber-1) 0%, var(--amber-2) 100%);
+            padding: 10px;
+            font-size: 13px;
+            text-align: center;
             color: #92400e;
             display: none;
-            font-weight: 500;
+            font-weight: 600;
         }
-        
-        .back-public { 
-            font-size: 12px; 
-            text-decoration: underline; 
-            cursor: pointer; 
-            color: white; 
+
+        .back-public {
+            font-size: 12px;
+            text-decoration: none;
+            cursor: pointer;
+            color: white;
             margin-right: 12px;
-            transition: opacity 0.3s;
+            padding: 4px 10px;
+            border-radius: 999px;
+            background: rgba(255,255,255,.2);
+            transition: all 0.3s;
         }
-        
+
         .back-public:hover {
-            opacity: 0.8;
+            background: rgba(255,255,255,.32);
         }
-        
+
         /* === 购物车项目优化 === */
         .cart-item {
             display: flex;
             gap: 12px;
-            border-bottom: 1px solid #e5e7eb;
+            align-items: center;
+            border: 1px solid var(--border);
             padding: 14px;
-            background: white;
-            border-radius: var(--radius-sm);
-            margin-bottom: 10px;
+            background: var(--surface);
+            border-radius: var(--radius-md);
+            margin-bottom: 12px;
             transition: all 0.3s ease;
-        }
-        
-        .cart-item:hover {
             box-shadow: var(--shadow-sm);
+        }
+
+        .cart-item:hover {
+            box-shadow: var(--shadow-md);
             transform: translateX(-4px);
         }
-        
+
         .cart-item img {
             width: 60px;
             height: 60px;
             border-radius: var(--radius-sm);
             object-fit: cover;
+            background: #f1f2f8;
         }
-        
+
         .cart-item button {
-            background: linear-gradient(135deg, #f3f4f6 0%, #e5e7eb 100%);
-            border: none;
-            width: 28px;
-            height: 28px;
+            background: #f1f2f8;
+            border: 1px solid var(--border);
+            width: 30px;
+            height: 30px;
             border-radius: 50%;
             cursor: pointer;
-            transition: all 0.3s ease;
-            font-weight: 600;
-            color: #374151;
+            transition: all 0.25s ease;
+            font-weight: 700;
+            font-size: 1rem;
+            color: #4b5563;
+            line-height: 1;
         }
-        
+
         .cart-item button:hover {
-            background: linear-gradient(135deg, #e5e7eb 0%, #d1d5db 100%);
-            transform: scale(1.1);
+            background: var(--brand);
+            border-color: transparent;
+            color: #fff;
+            transform: scale(1.12);
         }
-        
+
         /* === 结算区域优化 === */
         .checkout-section {
-            padding: 24px;
-            border-top: 2px solid #f3f4f6;
-            background: white;
+            padding: 22px 24px;
+            border-top: 1px solid var(--border);
+            background: var(--surface);
         }
-        
+
         .total-row {
             display: flex;
             justify-content: space-between;
+            align-items: baseline;
             margin-bottom: 16px;
-            font-size: 1.2rem;
+            font-size: 1.15rem;
             font-weight: 700;
         }
-        
+
         .total-price {
             color: var(--red);
-            font-size: 1.5rem;
+            font-size: 1.6rem;
+            font-weight: 800;
+            letter-spacing: -.5px;
         }
-        
+
         /* === 封禁屏幕优化 === */
         #banned-screen {
             display: none;
@@ -755,7 +854,7 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background: linear-gradient(135deg, #000000 0%, #1a1a1a 100%);
+            background: radial-gradient(1000px 600px at 50% 30%, #2a0d0d 0%, #0a0a0a 70%);
             color: var(--red);
             z-index: 99999;
             flex-direction: column;
@@ -764,13 +863,18 @@
             text-align: center;
             animation: fadeIn 0.5s ease;
         }
-        
+
         #banned-screen h1 {
             font-size: 4rem;
             margin: 0;
             animation: shake 0.5s ease;
         }
-        
+
+        #banned-screen h2 {
+            letter-spacing: 6px;
+            font-weight: 800;
+        }
+
         /* === Google 登录按钮优化 === */
         .divider {
             display: flex;
@@ -780,33 +884,35 @@
             color: #9ca3af;
             font-size: 0.85rem;
         }
-        
+
         .divider::before,
         .divider::after {
             content: '';
             flex: 1;
             height: 1px;
-            background: #e5e7eb;
+            background: var(--border);
         }
-        
+
         @keyframes shake {
             0%, 100% { transform: translateX(0); }
             25% { transform: translateX(-10px); }
             75% { transform: translateX(10px); }
         }
-        
+
         /* === 响应式优化 === */
         @media (max-width: 768px) {
+            header { padding: 14px 18px; }
+
             .sidebar {
                 width: 100%;
                 right: -100%;
             }
-            
+
             .grid {
                 grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
                 gap: 16px;
             }
-            
+
             .chat-box {
                 width: calc(100vw - 40px);
                 height: 70vh;
@@ -823,7 +929,7 @@
     </div>
 
     <header>
-        <div class="logo"yizhuo Store</div>
+        <div class="logo">yizhuo Store</div>
         <div class="nav-right">
             <button class="btn btn-icon" onclick="openNotices()">🔔</button>
             <span id="user-name" style="font-size:14px; font-weight:bold; color:#666"></span>
@@ -841,7 +947,7 @@
 
     <!-- 侧边栏 (购物车/订单/公告) -->
     <div class="sidebar-overlay" id="overlay" onclick="closeSidebar()"></div>
-    
+
     <div class="sidebar" id="sb-cart">
         <div class="sb-header"><span>购物车</span><span onclick="closeSidebar()">✕</span></div>
         <div class="sb-content" id="cart-list"></div>
@@ -853,12 +959,12 @@
             <button class="btn-black" style="width:100%; padding:14px; font-size:1rem" onclick="showPay()">立即结算</button>
         </div>
     </div>
-    
+
     <div class="sidebar" id="sb-orders">
         <div class="sb-header"><span>我的订单</span><span onclick="closeSidebar()">✕</span></div>
         <div class="sb-content" id="order-list"></div>
     </div>
-    
+
     <div class="sidebar" id="sb-notices">
         <div class="sb-header"><span>系统公告</span><span onclick="closeSidebar()">✕</span></div>
         <div class="sb-content" id="notice-list"></div>
@@ -875,11 +981,11 @@
             <button class="btn" style="margin-top:12px; background:#f3f4f6; width:100%; padding:12px" onclick="document.getElementById('pay-modal').style.display='none'">关闭</button>
         </div>
     </div>
-    
+
     <div class="modal-overlay" id="auth-modal">
         <div class="modal-box">
             <h2 id="auth-title">登录</h2>
-            
+
             <!-- Google 登录按钮 -->
             <div id="g_id_onload"
                  data-client_id="316558571894-tihc924vp0okpb3nc6pd4gm1flit8c6a.apps.googleusercontent.com"
@@ -887,9 +993,9 @@
                  data-auto_prompt="false">
             </div>
             <div id="google-signin-btn" class="g_id_signin" data-type="standard" data-size="large" data-theme="outline" data-text="signin_with" data-shape="rectangular" data-logo_alignment="left"></div>
-            
+
             <div class="divider"><span>或使用邮箱登录</span></div>
-            
+
             <input id="u-email" class="auth-input" placeholder="邮箱">
             <input id="u-pass" type="password" class="auth-input" placeholder="密码">
             <div id="captcha-area">
@@ -927,7 +1033,7 @@
     <script>
         const CONFIG = { appId: "SKHyBQH4nGeF6PDB8MVLTMD4-MdYXbMMI", appKey: "kUQ2O1stpz6V8bNhcbk2tkrV", serverURL: "https://skhybqh4.api.lncldglobal.com" };
         AV.init(CONFIG);
-        
+
         // === Google Sign-In 回调函数 ===
         function handleCredentialResponse(response) {
             console.log('Google 登录成功！');
@@ -937,7 +1043,7 @@
                 const jsonPayload = decodeURIComponent(atob(base64).split('').map(function(c) {
                     return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
                 }).join(''));
-                
+
                 const userData = JSON.parse(jsonPayload);
                 console.log('用户信息:', userData);
                 loginWithGoogle(userData);
@@ -946,7 +1052,7 @@
                 alert('Google 登录失败，请稍后重试');
             }
         }
-        
+
         // 使用 Google 信息登录
         async function loginWithGoogle(googleUser) {
             try {
@@ -954,7 +1060,7 @@
                 const name = googleUser.name;
                 const googleId = googleUser.sub;
                 const picture = googleUser.picture;
-                
+
                 // 先尝试用 email + googleId 登录（如果已存在）
                 try {
                     await AV.User.logIn(email, googleId);
@@ -963,10 +1069,9 @@
                     location.reload();
                     return;
                 } catch(loginErr) {
-                    // 登录失败，说明需要创建新用户
                     console.log('现有用户不存在或密码不匹配，准备创建新用户');
                 }
-                
+
                 // 创建新用户
                 const newUser = new AV.User();
                 newUser.setUsername(email);
@@ -975,20 +1080,21 @@
                 newUser.set('googleId', googleId);
                 newUser.set('displayName', name);
                 newUser.set('profilePicture', picture);
+                newUser.set('emailVerified', true); // 自动标记邮箱为已验证
                 await newUser.signUp();
                 console.log('新用户创建成功:', email);
-                
+
                 // 登录新用户
                 await AV.User.logIn(email, googleId);
                 document.getElementById('auth-modal').style.display = 'none';
                 location.reload();
-                
+
             } catch(err) {
                 console.error('Google 登录处理失败:', err);
                 alert('登录失败: ' + err.message);
             }
         }
-        
+
         // 初始化 Google Sign-In
         window.addEventListener('load', function() {
             if (window.google && google.accounts && google.accounts.id) {
@@ -997,7 +1103,7 @@
                     callback: handleCredentialResponse,
                     auto_select: false
                 });
-                
+
                 try {
                     google.accounts.id.renderButton(
                         document.getElementById('google-signin-btn'),
@@ -1017,7 +1123,7 @@
         let cart = JSON.parse(localStorage.getItem('myCart') || '[]');
         let isReg = false; let realC = "";
         let deviceId = localStorage.getItem('did') || 'dev_'+Date.now(); localStorage.setItem('did',deviceId);
-        
+
         // 聊天状态
         let currentChatMode = 'public';
         let currentOrderId = null;
@@ -1026,8 +1132,8 @@
         checkDevice(); checkUser(); loadProducts(); updateCartUI(); setInterval(loadChat, 3000);
 
         // === 1. 聊天逻辑 ===
-        function toggleChat() { 
-            const w = document.getElementById('chat-win'); 
+        function toggleChat() {
+            const w = document.getElementById('chat-win');
             w.style.display = w.style.display==='flex'?'none':'flex';
             if(w.style.display==='flex') loadChat();
         }
@@ -1047,29 +1153,29 @@
             closeSidebar();
             const w = document.getElementById('chat-win');
             w.style.display = 'flex';
-            
+
             currentChatMode = 'private';
             currentOrderId = orderId;
-            
+
             document.getElementById('chat-header').className = 'chat-header private';
             document.getElementById('chat-header').style.background = '';
             document.getElementById('chat-title').innerText = "🔒 订单客服";
             document.getElementById('chat-notice').style.display = 'block';
             document.getElementById('back-public').style.display = 'inline';
-            
+
             loadChat();
         }
 
         async function sendMsg() {
             if(!AV.User.current()) return alert("请先登录");
             const txt = document.getElementById('chat-txt').value; if(!txt) return;
-            
+
             const C = AV.Object.extend('ChatMessage');
             const m = new C();
             m.set('content', txt);
             m.set('senderName', AV.User.current().getUsername());
             m.set('isAdmin', false);
-            
+
             if (currentChatMode === 'private') {
                 m.set('isPrivate', true);
                 m.set('channel', 'order_' + currentOrderId);
@@ -1086,21 +1192,21 @@
 
         async function loadChat() {
             if(document.getElementById('chat-win').style.display==='none') return;
-            
+
             const q = new AV.Query('ChatMessage');
-            q.ascending('createdAt'); 
+            q.ascending('createdAt');
             q.limit(50);
 
             if (currentChatMode === 'private') {
                 q.equalTo('channel', 'order_' + currentOrderId);
             } else {
-                q.notEqualTo('isPrivate', true); 
+                q.notEqualTo('isPrivate', true);
             }
 
             const msgs = await q.find();
             const div = document.getElementById('chat-hist'); div.innerHTML = "";
             const me = AV.User.current() ? AV.User.current().getUsername() : "";
-            
+
             msgs.forEach(m => {
                 const isMe = m.get('senderName') === me;
                 const isAdmin = m.get('isAdmin');
@@ -1127,14 +1233,14 @@
                     </div>`;
             });
         }
-        
+
         async function showPay() {
             const t = document.getElementById('total-price').innerText; if(t=="0")return alert("购物车为空");
             document.getElementById('pay-modal').style.display='flex';
             document.getElementById('pay-amount').innerText = t;
             const q=new AV.Query('GlobalConfig'); const c=await q.first(); document.getElementById('qr-img').src=c?c.get('paymentQR'):"";
         }
-        
+
         async function confirmPaid() {
             if(!confirm("确认已付款？")) return;
             const Order = AV.Object.extend('Order'); const o = new Order();
@@ -1144,94 +1250,98 @@
         }
 
         // === 3. 基础功能 ===
-        function toggleSidebar(id) { 
-            document.querySelectorAll('.sidebar').forEach(s=>s.classList.remove('open')); 
-            document.getElementById('overlay').style.display='block'; 
-            document.getElementById('sb-'+id).classList.add('open'); 
+        function toggleSidebar(id) {
+            document.querySelectorAll('.sidebar').forEach(s=>s.classList.remove('open'));
+            document.getElementById('overlay').style.display='block';
+            document.getElementById('sb-'+id).classList.add('open');
         }
-        
-        function closeSidebar() { 
-            document.querySelectorAll('.sidebar').forEach(s=>s.classList.remove('open')); 
-            document.getElementById('overlay').style.display='none'; 
+
+        function closeSidebar() {
+            document.querySelectorAll('.sidebar').forEach(s=>s.classList.remove('open'));
+            document.getElementById('overlay').style.display='none';
         }
-        
-        async function checkDevice() { 
-            const q=new AV.Query('DeviceBlacklist'); 
-            q.equalTo('deviceId',deviceId); 
+
+        async function checkDevice() {
+            const q=new AV.Query('DeviceBlacklist');
+            q.equalTo('deviceId',deviceId);
             if(await q.first()){
                 document.getElementById('banned-screen').style.display='flex';
                 AV.User.logOut();
                 throw new Error("Banned");
-            } 
+            }
         }
-        
-        function checkUser() { 
-            const u=AV.User.current(); 
+
+        function checkUser() {
+            const u=AV.User.current();
             if(u){
                 document.getElementById('user-name').innerText=u.getUsername();
                 document.getElementById('btn-login').style.display='none';
                 document.getElementById('btn-logout').style.display='block';
                 document.getElementById('btn-orders').style.display='block';
-            } 
+            }
         }
-        
+
         function logout() { AV.User.logOut(); location.reload(); }
         function openAuth() { document.getElementById('auth-modal').style.display='flex'; }
-        
-        function toggleAuthMode() { 
-            isReg=!isReg; 
-            document.getElementById('auth-title').innerText=isReg?"注册":"登录"; 
-            document.getElementById('auth-btn').innerText=isReg?"注册":"登录"; 
-            document.getElementById('switch-txt').innerText=isReg?"返回登录":"去注册"; 
-            document.getElementById('captcha-area').style.display=isReg?'block':'none'; 
-            if(isReg)drawC(); 
+
+        function toggleAuthMode() {
+            isReg=!isReg;
+            document.getElementById('auth-title').innerText=isReg?"注册":"登录";
+            document.getElementById('auth-btn').innerText=isReg?"注册":"登录";
+            document.getElementById('switch-txt').innerText=isReg?"返回登录":"去注册";
+            document.getElementById('captcha-area').style.display=isReg?'block':'none';
+            if(isReg)drawC();
         }
-        
-        function drawC() { 
-            const ctx=document.getElementById('captcha-canvas').getContext('2d'); 
-            ctx.fillStyle='#f3f4f6'; 
-            ctx.fillRect(0,0,100,40); 
-            const s='ABCDEFGHJKLMNPQRSTUVWXYZ23456789'; 
-            realC=''; 
-            for(let i=0;i<4;i++)realC+=s[Math.floor(Math.random()*s.length)]; 
-            ctx.fillStyle='#374151'; 
-            ctx.font='bold 20px Arial'; 
-            ctx.fillText(realC,25,28); 
+
+        function drawC() {
+            const ctx=document.getElementById('captcha-canvas').getContext('2d');
+            ctx.fillStyle='#f3f4f6';
+            ctx.fillRect(0,0,100,40);
+            const s='ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+            realC='';
+            for(let i=0;i<4;i++)realC+=s[Math.floor(Math.random()*s.length)];
+            ctx.fillStyle='#374151';
+            ctx.font='bold 20px Arial';
+            ctx.fillText(realC,25,28);
         }
-        
-        async function submitAuth() { 
-            const e=document.getElementById('u-email').value, p=document.getElementById('u-pass').value; 
-            try{ 
-                if(isReg){ 
+
+        async function submitAuth() {
+            const e=document.getElementById('u-email').value, p=document.getElementById('u-pass').value;
+            try{
+                if(isReg){
                     if(document.getElementById('c-input').value.toUpperCase()!==realC)return alert("验证码错误");
                     const u=new AV.User();
                     u.setUsername(e);
                     u.setPassword(p);
                     u.setEmail(e);
+                    u.set('emailVerified', true); // 自动标记邮箱为已验证
                     await u.signUp();
-                    alert("注册成功，请激活邮箱");
-                    toggleAuthMode(); 
-                }else{ 
-                    await AV.User.logIn(e,p); 
+                    alert("注册成功！");
+                    toggleAuthMode();
+                    // 自动登录
+                    await AV.User.logIn(e, p);
+                    location.reload();
+                }else{
+                    await AV.User.logIn(e,p);
                     const q=new AV.Query('Blacklist');
                     q.equalTo('email',e);
                     if(await q.count()>0){
                         alert("账号已被封禁");
                         AV.User.logOut();
                         return;
-                    } 
-                    location.reload(); 
-                } 
+                    }
+                    location.reload();
+                }
             }catch(err){
                 alert(err.message);
                 if(isReg)drawC();
-            } 
+            }
         }
-        
-        async function loadProducts() { 
-            const q=new AV.Query('Product'); 
-            q.descending('createdAt'); 
-            const res=await q.find(); 
+
+        async function loadProducts() {
+            const q=new AV.Query('Product');
+            q.descending('createdAt');
+            const res=await q.find();
             document.getElementById('product-list').innerHTML=res.map(p=>`
                 <div class="card">
                     <img src="${p.get('image')}">
@@ -1241,30 +1351,30 @@
                         <button class="btn-add" onclick='addToCart({id:"${p.id}",name:"${p.get('name')}",price:${p.get('price')},image:"${p.get('image')}"})'>+ 加入购物车</button>
                     </div>
                 </div>
-            `).join(''); 
+            `).join('');
         }
-        
-        function addToCart(item) { 
-            if(!AV.User.current())return openAuth(); 
-            const ex=cart.find(x=>x.id===item.id); 
-            if(ex)ex.count++; 
-            else cart.push({...item,count:1}); 
-            saveCart(); 
-            toggleSidebar('cart'); 
+
+        function addToCart(item) {
+            if(!AV.User.current())return openAuth();
+            const ex=cart.find(x=>x.id===item.id);
+            if(ex)ex.count++;
+            else cart.push({...item,count:1});
+            saveCart();
+            toggleSidebar('cart');
         }
-        
-        function saveCart() { 
-            localStorage.setItem('myCart', JSON.stringify(cart)); 
-            updateCartUI(); 
+
+        function saveCart() {
+            localStorage.setItem('myCart', JSON.stringify(cart));
+            updateCartUI();
         }
-        
-        function updateCartUI() { 
-            document.getElementById('cart-count').innerText=cart.reduce((a,b)=>a+b.count,0); 
-            const l=document.getElementById('cart-list'); 
-            l.innerHTML=""; 
-            let t=0; 
+
+        function updateCartUI() {
+            document.getElementById('cart-count').innerText=cart.reduce((a,b)=>a+b.count,0);
+            const l=document.getElementById('cart-list');
+            l.innerHTML="";
+            let t=0;
             cart.forEach((i,idx)=>{
-                t+=i.price*i.count; 
+                t+=i.price*i.count;
                 l.innerHTML+=`
                     <div class="cart-item">
                         <img src="${i.image}">
@@ -1279,29 +1389,29 @@
                         </div>
                     </div>
                 `
-            }); 
-            document.getElementById('total-price').innerText=t; 
+            });
+            document.getElementById('total-price').innerText=t;
         }
-        
+
         function chQ(i,d){
             cart[i].count+=d;
             if(cart[i].count<=0)cart.splice(i,1);
             saveCart();
         }
-        
-        async function openNotices(){ 
-            toggleSidebar('notices'); 
-            const q=new AV.Query('Announcement'); 
-            q.descending('createdAt'); 
-            const res=await q.find(); 
+
+        async function openNotices(){
+            toggleSidebar('notices');
+            const q=new AV.Query('Announcement');
+            q.descending('createdAt');
+            const res=await q.find();
             document.getElementById('notice-list').innerHTML=res.map(n=>`
                 <div style="padding:16px; border-bottom:1px solid #e5e7eb; background:linear-gradient(135deg, #fef3c7 0%, #fde68a 100%); margin-bottom:12px; border-radius:var(--radius-md); box-shadow:var(--shadow-sm)">
                     <div style="font-weight:600; margin-bottom:4px">${n.get('content')}</div>
                     <div style="font-size:12px; color:#92400e">${n.createdAt.toLocaleString()}</div>
                 </div>
-            `).join(''); 
+            `).join('');
         }
-        
+
         // 回车发送消息
         document.getElementById('chat-txt').addEventListener('keypress', function(e) {
             if (e.key === 'Enter') sendMsg();
